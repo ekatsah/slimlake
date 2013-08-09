@@ -7,8 +7,35 @@
     <script src="thirdparty/backbone-min.js"></script>
     <script src="thirdparty/handlebars.js"></script>
     <script src="thirdparty/foundation.min.js"></script>
-    <script src="sharky/mainpage.html" type="text/x-html-template"></script>
     <script src="sharky/hamapp.js"></script>
+
+    <script type="text/x-handlebars-template" id="main-page">
+      <div class="row">
+        <div id="page-title" class="large-12 columns">
+          <h1>Computationnal Geometry</h1>
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="render-param" class="large-12 columns">
+          <ul>
+            <li><strong>state</strong>: {{ state }}</li>
+            <li><strong>display-canvas</strong>: {{ display-canvas }}</li>
+            <li><strong>help-text</strong>: {{ help-text }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="menu-bar" class="large-3 columns">
+          menu
+        </div>
+        <div id="right-panel" class="large-9 columns">
+          canvas<br>
+          help
+        </div>
+      </div>
+    </script>
   </head>
 
   <body>
@@ -21,7 +48,9 @@
     <script>
       $(document).foundation();
       $(document).ready(function() {
-        hamsandwich();
+        var app = new hamapp({
+		  el: "body"
+	    });
       });
     </script>
   </body>
