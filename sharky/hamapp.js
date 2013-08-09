@@ -1,7 +1,7 @@
 new_canvas = function() {
 	var data = {
-		red_points: [],
-		blue_points: [],
+		red_points: [{x:100, y:200}, {x:150, y:300}, {x:287, y:54}],
+		blue_points: [{x:400, y:501}, {x: 320, y: 120}, {x: 40, y: 40}],
 		width: 100,
 		height: 100,
 	};
