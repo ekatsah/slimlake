@@ -1,11 +1,19 @@
 new_canvas = function() {
 	var data = {
-		red_points: [{x:100, y:200}, {x:150, y:300}, {x:287, y:54}],
-		blue_points: [{x:400, y:501}, {x: 320, y: 120}, {x: 40, y: 40}],
+		red_points: [{x:1, y:2}, {x:-1, y:-3}, {x:-2.3, y:5}],
+		blue_points: [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}],
 		width: 100,
 		height: 100,
 	};
 	var p = false;
+
+	var tx = function(x) {
+		return x * 20 + data.width/2;
+	};
+
+	var ty = function(y) {
+		return data.height/2 - y * 20;
+	};
 
 	return {
 		setup: function(el) {
@@ -27,14 +35,30 @@ new_canvas = function() {
 			p.fill(255, 0, 0);
 			p.noStroke();
 			$(data.red_points).each(function(i, point) {
-				p.ellipse(point.x, point.y, 10, 10);
+				p.ellipse(tx(point.x), ty(point.y), 10, 10);
 			});
 
 			// draw blue points
 			p.fill(0, 0, 255);
 			p.noStroke();
 			$(data.blue_points).each(function(i, point) {
-				p.ellipse(point.x, point.y, 10, 10);
+				p.ellipse(tx(point.x), ty(point.y), 10, 10);
+			});
+
+			// draw pseudo axis
+			p.stroke(0);
+			p.line(data.width/2, 0, data.width/2, data.height);
+			p.line(0, data.height/2, data.width, data.height/2);
+
+			// draw red lines
+			p.stroke(255, 0, 0);
+			$(data.red_points).each(function(i, point) {
+				p.line(tx(-10), ty(point.x * -10 - point.y), tx(10), ty(point.x * 10 - point.y));
+			});
+
+			p.stroke(0, 0, 255);
+			$(data.blue_points).each(function(i, point) {
+				p.line(tx(-10), ty(point.x * -10 - point.y), tx(10), ty(point.x * 10 - point.y));
 			});
 		},
 
