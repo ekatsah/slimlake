@@ -2,18 +2,27 @@ new_canvas = function() {
 	var data = {
 		x: 100,
 		y: 100,
-		width: 300,
-		height: 200,
+		width: 100,
+		height: 100,
 	};
+	var p = false;
 
 	return {
-		draw: function(el) {
-			var p = new Processing(el);
-			p.size(data.width, data.height);
-			p.background("#ffaaaa");
+		setup: function(el) {
+			p = new Processing(el);
 			p.smooth();
-			p.stroke(50);
+			p.size(data.width, data.height);
+			p.stroke(0);
 			p.noLoop();
+		},
+
+		draw: function() {
+			if (p == false) {
+				console.error("processing context not init");
+				return;
+			}
+
+			p.background(255, 220, 255);
 			p.ellipse(data.x, data.y, 50, 50);
 		},
 
@@ -39,6 +48,7 @@ var hamapp = Backbone.View.extend({
 			"help_text": "wazup lorem ipsum",
 			"print_debug": true,
 		};
+		this.step = 1;
 		this.canvas_engine = new_canvas();
 		this.canvas_engine.set_size(710, 600);
 		this.render();
@@ -47,8 +57,10 @@ var hamapp = Backbone.View.extend({
 	render: function() {
 		var html = this.template(this.variables);
 		$(this.el).html(html);
-		if (this.variables.display_canvas)
-			this.canvas_engine.draw(document.getElementById('render-zone'));
+		if (this.variables.display_canvas) {
+			this.canvas_engine.setup(document.getElementById('render-zone'));
+			this.canvas_engine.draw();
+		}
 	},
 
 	events: {
@@ -60,6 +72,16 @@ var hamapp = Backbone.View.extend({
 		"click #show-canvas": function() {
 			this.variables.display_canvas = true;
 			this.render();
+		},
+
+		"click #render-zone": function() {
+			this.canvas_engine.move(100, 100 + this.step * 20);
+			this.canvas_engine.draw();
+
+			if (this.step >= 10)
+				this.step = 0;
+			else
+				this.step += 1;
 		},
 	}
 });
