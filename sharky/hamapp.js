@@ -4,9 +4,9 @@ var hamapp = Backbone.View.extend({
 		this.variables = {
 			"state": 1,
 			"display_canvas": true,
-			"help-title": "Introduction",
-			"help-text": "wazup lorem ipsum",
-			"print-debug": true,
+			"help_title": "Introduction",
+			"help_text": "wazup lorem ipsum",
+			"print_debug": true,
 		};
 		this.render();
 	},
