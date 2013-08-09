@@ -49,6 +49,11 @@ new_canvas = function() {
 			data.width = new_width;
 			data.height = new_height;
 		},
+
+		cut2: function() {
+			var G = data.red_points.concat(data.blue_points);
+			console.log(G);
+		}
 	};
 };	
 
@@ -152,6 +157,7 @@ var hamapp = Backbone.View.extend({
 		"click #a-cut2": function() {
 			this.variables.mode = "algo";
 			this.variables.algo = "cut2";
+			this.canvas_engine.cut2();
 			this.render();
 		}
 	}
