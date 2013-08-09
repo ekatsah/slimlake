@@ -25,11 +25,19 @@
           </ul>
         </div>
         <div id="right-panel" class="large-9 columns">
+          {{#if display_canvas }}
           <div style="height: 600px; background-color: white;
                       border: 1px #ddd solid; box-shadow: 0px 0px 3px #888;">
           </div>
+          {{/if }}
 
           <div>
+            {{#if display_canvas }}
+            <a id="mask-canvas" class="tiny button" href="#" style="float: right">mask canvas</a>
+            {{else}}
+            <a id="show-canvas" class="tiny button" href="#" style="float: right">show canvas</a>
+            {{/if }}
+
             <h3>{{ help-title }}</h3>
             {{ help-text }}
           </div>
