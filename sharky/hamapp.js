@@ -1,4 +1,4 @@
-canvas = function() {
+new_canvas = function() {
 	var data = {
 		x: 100,
 		y: 100,
@@ -20,9 +20,14 @@ canvas = function() {
 		move: function(nx, ny) {
 			data.x = nx;
 			data.y = ny;
-		}
+		},
+
+		set_size: function(new_width, new_height) {
+			data.width = new_width;
+			data.height = new_height;
+		},
 	};
-}();	
+};	
 
 var hamapp = Backbone.View.extend({
 	initialize: function() {
@@ -34,6 +39,8 @@ var hamapp = Backbone.View.extend({
 			"help_text": "wazup lorem ipsum",
 			"print_debug": true,
 		};
+		this.canvas_engine = new_canvas();
+		this.canvas_engine.set_size(710, 600);
 		this.render();
 	},
 
@@ -41,7 +48,7 @@ var hamapp = Backbone.View.extend({
 		var html = this.template(this.variables);
 		$(this.el).html(html);
 		if (this.variables.display_canvas)
-			canvas.draw(document.getElementById('render-zone'));
+			this.canvas_engine.draw(document.getElementById('render-zone'));
 	},
 
 	events: {
