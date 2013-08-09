@@ -19,22 +19,25 @@
       <div class="row">
         <div id="menu-bar" class="large-3 columns">
           <ul class="side-nav">
-            <li {{#cmp mode "==" "intro" }}class="active"{{/cmp}}><a href="#" id="a-intro">Introduction</a></li>
+            <li {{{active2 mode "intro"}}}><a href="#" id="a-intro">Introduction</a></li>
             <li class="divider"></li>
 
-            <li {{#cmp mode "==" "editor" }}class="active"{{/cmp}}><a href="#" id="a-editor">Editor</a></li>
-			{{#cmp mode "==" "editor" }}
+            <li {{{active2 mode "editor"}}}><a href="#" id="a-editor">Editor</a></li>
             <li>
               <dl class="sub-nav">
                 <dt>Points:</dt>
-                <dd {{#cmp color "==" "red" }}class="active"{{/cmp}}><a href="#" id="a-red">Red</a></dd>
-                <dd {{#cmp color "==" "blue" }}class="active"{{/cmp}}><a href="#" id="a-blue">Blue</a></dd>
+                <dd {{{active4 mode "editor" color "red"}}}><a href="#" id="a-red">Red</a></dd>
+                <dd {{{active4 mode "editor" color "blue"}}}><a href="#" id="a-blue">Blue</a></dd>
               </dl>
             </li>
-			{{/cmp}}
             <li class="divider"></li>
 
-            <li {{#cmp mode "==" "algo" }}class="active"{{/cmp}}><a href="#" id="a-algo">Algorithms</a></li>
+            <li {{{active2 mode "algo"}}}><a href="#" id="a-algo">Algorithms</a></li>
+            <li>
+              <ul class="side-nav" style="margin-left: 10px; padding-top: 0px">
+                <li {{{active4 mode "algo" algo "cut2"}}}><a href="#" id="a-cut2">Cut in two damit</a></li>
+              </ul>
+            </li>
           </ul>
         </div>
         <div id="right-panel" class="large-9 columns">

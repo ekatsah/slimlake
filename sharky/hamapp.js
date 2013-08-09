@@ -54,31 +54,27 @@ new_canvas = function() {
 
 var hamapp = Backbone.View.extend({
 	initialize: function() {
-		Handlebars.registerHelper("cmp", function(lvalue, operator, rvalue, item) {
-			var operators = {
-				"==":	function(l,r) { return l == r; },
-				"===":	function(l,r) { return l === r; },
-				"!=":	function(l,r) { return l != r; },
-				"<":	function(l,r) { return l < r; },
-				">":	function(l,r) { return l > r; },
-				"<=":	function(l,r) { return l <= r; },
-				">=":	function(l,r) { return l >= r; },
-				"typeof": function(l,r) { return typeof l == r; }
-			};
+		Handlebars.registerHelper("active2", function(variable, value, item) {
+			console.log("active2 : " + variable + " == " + value);
+			if (variable == value) {
+				console.log("true");
+				return 'class="active"';
+			} else
+				return "";
+		});
 
-			if (!operators[operator])
-				throw new Error("operator not found : " + operator);
-
-			if (operators[operator](lvalue,rvalue))
-				return item.fn(this);
+		Handlebars.registerHelper("active4", function(var1, value1, var2, value2, item) {
+			if ((var1 == value1) && (var2 == value2))
+				return 'class="active"';
 			else
-				return item.inverse(this);
+				return "";
 		});
 
 		this.template = Handlebars.compile($("#main-page").html());
 		this.variables = {
 			"mode": "intro",
 			"color": "red",
+			"algo": "cut2",
 			"display_canvas": true,
 			"help_title": "Introduction",
 			"help_text": "wazup lorem ipsum",
@@ -152,5 +148,11 @@ var hamapp = Backbone.View.extend({
 			this.variables.mode = "algo";
 			this.render();
 		},
+
+		"click #a-cut2": function() {
+			this.variables.mode = "algo";
+			this.variables.algo = "cut2";
+			this.render();
+		}
 	}
 });
