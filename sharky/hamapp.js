@@ -75,7 +75,12 @@ new_canvas = function() {
 		},
 
 		cut2: function() {
-			var G = data.red_points.concat(data.blue_points);
+			var G = [];
+			$(data.red_points.concat(data.blue_points)).each(function(i, p) {
+				G.push({x: p.x, y: -p.y});
+			});
+
+			
 			console.log(G);
 		}
 	};
