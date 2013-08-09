@@ -60,11 +60,9 @@ new_canvas = function() {
 var hamapp = Backbone.View.extend({
 	initialize: function() {
 		Handlebars.registerHelper("active2", function(variable, value, item) {
-			console.log("active2 : " + variable + " == " + value);
-			if (variable == value) {
-				console.log("true");
+			if (variable == value)
 				return 'class="active"';
-			} else
+			else
 				return "";
 		});
 
