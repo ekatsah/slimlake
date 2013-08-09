@@ -1,7 +1,7 @@
 new_canvas = function() {
 	var data = {
-		x: 100,
-		y: 100,
+		red_points: [],
+		blue_points: [],
 		width: 100,
 		height: 100,
 	};
@@ -12,7 +12,6 @@ new_canvas = function() {
 			p = new Processing(el);
 			p.smooth();
 			p.size(data.width, data.height);
-			p.stroke(0);
 			p.noLoop();
 		},
 
@@ -22,13 +21,28 @@ new_canvas = function() {
 				return;
 			}
 
-			p.background(255, 220, 255);
-			p.ellipse(data.x, data.y, 50, 50);
+			p.background(255, 255, 255);
+
+			// draw red points
+			p.fill(255, 0, 0);
+			p.noStroke();
+			$(data.red_points).each(function(i, point) {
+				p.ellipse(point.x, point.y, 10, 10);
+			});
+
+			// draw blue points
+			p.fill(0, 0, 255);
+			p.noStroke();
+			$(data.blue_points).each(function(i, point) {
+				p.ellipse(point.x, point.y, 10, 10);
+			});
 		},
 
-		move: function(nx, ny) {
-			data.x = nx;
-			data.y = ny;
+		add_point: function(color, x, y) {
+			if (color == "red")
+				data.red_points.push({x: x, y: y});
+			if (color == "blue")
+				data.blue_points.push({x: x, y: y});
 		},
 
 		set_size: function(new_width, new_height) {
@@ -48,7 +62,7 @@ var hamapp = Backbone.View.extend({
 			"help_text": "wazup lorem ipsum",
 			"print_debug": true,
 		};
-		this.step = 1;
+
 		this.canvas_engine = new_canvas();
 		this.canvas_engine.set_size(710, 600);
 		this.render();
@@ -63,6 +77,16 @@ var hamapp = Backbone.View.extend({
 		}
 	},
 
+	xy: function(e) {
+		if (this.variables.display_canvas)
+			return {
+				x: e.pageX - $("#render-zone").offset().left,
+				y: e.pageY - $("#render-zone").offset().top,
+			};
+		else
+			return {x: 0, y: 0};
+	},
+
 	events: {
 		"click #mask-canvas": function() {
 			this.variables.display_canvas = false;
@@ -74,14 +98,10 @@ var hamapp = Backbone.View.extend({
 			this.render();
 		},
 
-		"click #render-zone": function() {
-			this.canvas_engine.move(100, 100 + this.step * 20);
+		"click #render-zone": function(e) {
+			var pos = this.xy(e);
+			this.canvas_engine.add_point("red", pos.x, pos.y);
 			this.canvas_engine.draw();
-
-			if (this.step >= 10)
-				this.step = 0;
-			else
-				this.step += 1;
 		},
 	}
 });
