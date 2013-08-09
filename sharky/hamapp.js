@@ -9,7 +9,8 @@ var hamapp = Backbone.View.extend({
 			"state": 1,
 			"display-canvas": true,
 			"help-title": "Introduction",
-			"help-text": "wazup lorem ipsum"
+			"help-text": "wazup lorem ipsum",
+			"print-debug": true,
 		});
 		$(this.el).html(html);
 	}
