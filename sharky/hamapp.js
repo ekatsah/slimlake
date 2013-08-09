@@ -17,7 +17,7 @@ new_canvas = function() {
 
 		draw: function() {
 			if (p == false) {
-				console.error("processing context not init");
+				throw new Error("processing context not init");
 				return;
 			}
 
@@ -54,9 +54,31 @@ new_canvas = function() {
 
 var hamapp = Backbone.View.extend({
 	initialize: function() {
+		Handlebars.registerHelper("cmp", function(lvalue, operator, rvalue, item) {
+			var operators = {
+				"==":	function(l,r) { return l == r; },
+				"===":	function(l,r) { return l === r; },
+				"!=":	function(l,r) { return l != r; },
+				"<":	function(l,r) { return l < r; },
+				">":	function(l,r) { return l > r; },
+				"<=":	function(l,r) { return l <= r; },
+				">=":	function(l,r) { return l >= r; },
+				"typeof": function(l,r) { return typeof l == r; }
+			};
+
+			if (!operators[operator])
+				throw new Error("operator not found : " + operator);
+
+			if (operators[operator](lvalue,rvalue))
+				return item.fn(this);
+			else
+				return item.inverse(this);
+		});
+
 		this.template = Handlebars.compile($("#main-page").html());
 		this.variables = {
-			"state": 1,
+			"mode": "intro",
+			"color": "red",
 			"display_canvas": true,
 			"help_title": "Introduction",
 			"help_text": "wazup lorem ipsum",
@@ -100,8 +122,35 @@ var hamapp = Backbone.View.extend({
 
 		"click #render-zone": function(e) {
 			var pos = this.xy(e);
-			this.canvas_engine.add_point("red", pos.x, pos.y);
+			this.canvas_engine.add_point(this.variables.color, pos.x, pos.y);
 			this.canvas_engine.draw();
+		},
+
+		"click #a-intro": function() {
+			this.variables.mode = "intro";
+			this.render();
+		},
+
+		"click #a-editor": function() {
+			this.variables.mode = "editor";
+			this.render();
+		},
+
+		"click #a-red": function() {
+			this.variables.mode = "editor";
+			this.variables.color = "red";
+			this.render();
+		},
+
+		"click #a-blue": function() {
+			this.variables.mode = "editor";
+			this.variables.color = "blue";
+			this.render();
+		},
+
+		"click #a-algo": function() {
+			this.variables.mode = "algo";
+			this.render();
 		},
 	}
 });

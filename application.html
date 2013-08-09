@@ -19,9 +19,22 @@
       <div class="row">
         <div id="menu-bar" class="large-3 columns">
           <ul class="side-nav">
-            <li class="active">Introduction</li>
-            <li>Editor</li>
-            <li>Algorithm</li>
+            <li {{#cmp mode "==" "intro" }}class="active"{{/cmp}}><a href="#" id="a-intro">Introduction</a></li>
+            <li class="divider"></li>
+
+            <li {{#cmp mode "==" "editor" }}class="active"{{/cmp}}><a href="#" id="a-editor">Editor</a></li>
+			{{#cmp mode "==" "editor" }}
+            <li>
+              <dl class="sub-nav">
+                <dt>Points:</dt>
+                <dd {{#cmp color "==" "red" }}class="active"{{/cmp}}><a href="#" id="a-red">Red</a></dd>
+                <dd {{#cmp color "==" "blue" }}class="active"{{/cmp}}><a href="#" id="a-blue">Blue</a></dd>
+              </dl>
+            </li>
+			{{/cmp}}
+            <li class="divider"></li>
+
+            <li {{#cmp mode "==" "algo" }}class="active"{{/cmp}}><a href="#" id="a-algo">Algorithms</a></li>
           </ul>
         </div>
         <div id="right-panel" class="large-9 columns">
