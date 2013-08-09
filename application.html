@@ -7,7 +7,10 @@
     <script src="thirdparty/backbone-min.js"></script>
     <script src="thirdparty/handlebars.js"></script>
     <script src="thirdparty/foundation.min.js"></script>
+    <script src="thirdparty/processing-1.4.1.min.js"></script>
     <script src="sharky/hamapp.js"></script>
+    <script src="sharky/render.pde" type="application/processing"
+            data-processing-target="render-zone"></script>
 
     <script type="text/x-handlebars-template" id="main-page">
       <div class="row">
@@ -26,8 +29,9 @@
         </div>
         <div id="right-panel" class="large-9 columns">
           {{#if display_canvas }}
-          <div style="height: 600px; background-color: white;
+          <div style="height: 602px; width: 712px; background-color: white;
                       border: 1px #ddd solid; box-shadow: 0px 0px 3px #888;">
+            <canvas id="render-zone"></canvas>
           </div>
           {{/if }}
 
