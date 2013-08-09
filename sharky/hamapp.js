@@ -8,6 +8,7 @@ var hamapp = Backbone.View.extend({
 		var html = this.template({
 			"state": 1,
 			"display-canvas": true,
+			"help-title": "Introduction",
 			"help-text": "wazup lorem ipsum"
 		});
 		$(this.el).html(html);
