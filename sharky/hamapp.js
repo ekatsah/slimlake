@@ -98,7 +98,11 @@ var line = function(na, nb, ncolor) {
 			return point(x, a * x + b, ncolor);
 		},
 
-		color: function() { return color; },
+		color: function(c) {
+			if (c != undefined)
+				color = c;
+			return color;
+		},
 	};
 };
 
