@@ -505,13 +505,14 @@ var hamapp = Backbone.View.extend({
 			this.variables.algo = "cut2";
 			this.tmp = undefined;
 
-			reds = [{x:1, y:2}, {x:-1, y:-3}, {x:-2.3, y:5}];
-			blues = [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}];
-
+			// general data
 			this.points = [];
-			this.line = [];
+			this.lines = [];
 			this.polys = [];
 			self = this;
+
+			reds = [{x:1, y:2}, {x:-1, y:-3}, {x: 0.5, y: -5}];
+			blues = [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}, {x: -5, y: -8.4}, {x:-0.4, y: 8}];
 
 			$(reds).each(function(i, p) {
 				self.points.push(point(p.x, p.y, "FF0000FF"));
@@ -523,8 +524,57 @@ var hamapp = Backbone.View.extend({
 				self.lines.push(point(p.x, p.y, "0000FFFF").dual());
 			});
 
-			i = this.intersection(reds[1], reds[2]);
-			this.points.push(point(i.x, i.y, "00FF00FF"));
+			// helpers
+			var print_lineset = function(s) {
+				console.log("print lineset");
+				$(s).each(function(i, l) {
+					console.log(" [" + i + "] : " + l.str() + ", color = " + l.color());
+				});
+			};
+
+			var union = function(set1, set2) {
+				return _.clone(set1.concat(set2));
+			};
+
+			var steepness = function(l1, l2) {
+				return l1.a() - l2.a();
+			};
+
+
+			// first round of algo - input
+
+			var G1 = [], G2 = [];
+			$(this.lines).each(function(i, l) {
+				if (l.color() == "FF0000FF")
+					G1.push(_.clone(l));
+				else
+					G2.push(_.clone(l));
+			});
+			var m1 = G1.length, m2 = G2.length;
+
+			var G = union(G1, G2);
+			G.sort(steepness);
+
+			var k1 = Math.floor((m1 + 1)/2), k2 = Math.floor((m2 + 1)/2);
+			console.log("k1 = " + k1 + " et k2 = " + k2);
+			print_lineset(G);
+
+			var gstar = G[Math.floor(G.length / 2)];
+			console.log("gstar = " + gstar.str());
+
+			var gminus = [], gplus = [], M = [];
+			for (var i = 0; i < Math.floor(G.length / 2); ++i) {
+				gminus.push(G[i]);
+				gplus.push(G[G.length - i - 1]);
+				M.push(G[i].intersection(G[G.length - i - 1], "00FF00FF"));
+			}
+
+			print_lineset(gminus);
+			print_lineset(gplus);
+
+			$(M).each(function(i, p) {
+				self.points.push(p);
+			});
 		}
 	}
 });
