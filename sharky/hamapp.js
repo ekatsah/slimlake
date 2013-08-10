@@ -116,7 +116,7 @@ var polygon = function(npoints, ncolor, nclosed) {
 				parseInt(color[0] + color[1], 16),
 				parseInt(color[2] + color[3], 16),
 				parseInt(color[4] + color[5], 16),
-				parseInt(color[6] + color[7], 16) / 4
+				parseInt(color[6] + color[7], 16) / 5
 			);
 			p.beginShape();
 			$(points).each(function(i, o) {
