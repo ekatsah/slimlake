@@ -178,11 +178,20 @@ var polygon = function(npoints, ncolor, nclosed) {
 		},
 
 		is_inside: function(point) {
+			// true if point inside this polygon, false otherwise
+			// raytracing method, against a horizontal line from the point
+
 			var intersection = 0;
 
 			$(edges()).each(function(i, e) {
-				ipt = e.intersection(line(0, point.y(), ""));
+				ipt = e.line().intersection(line(0, point.y(), ""));
+				if (ipt.x() > point.x() &&
+						((ipt.y() > e.p1().y() && ipt.y() < e.p2().y()) ||
+						 (ipt.y() < e.p1().y() && ipt.y() > e.p2().y())))
+					intersection += 1;
 			});
+
+			return intersection % 2 == 1;
 		},
 	};
 }
