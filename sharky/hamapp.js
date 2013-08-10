@@ -134,9 +134,9 @@ var polygon = function(npoints, ncolor, nclosed) {
 		edges = [];
 		$(points).each(function(i, o) {
 			if (i > 0)
-				edges.push(line_from_2points(points[i - 1], o, color));
+				edges.push(segment(points[i - 1], o, color));
 		});
-		edges.push(line_from_2points(points[points.length - 1], points[0], color));
+		edges.push(segment(points[points.length - 1], points[0], color));
 		return edges;
 	};
 
