@@ -75,6 +75,15 @@ var line = function(na, nb, ncolor) {
 	};
 };
 
+var line_from_2points = function(p1, p2, color) {
+	if (p1.x() == p2.x())
+		var epsi = 0.01;
+	else
+		var epsi = 0;
+
+	var a = (p1.y() - p2.y()) / (p1.x() - p2.x() + epsi);
+	return line(a, p1.y() - a * p1.x(), color);
+};
 
 // Polygon, list of points
 var polygon = function(npoints, ncolor, nclosed) {
