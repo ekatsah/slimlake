@@ -101,6 +101,7 @@ new_canvas = function() {
 
 	return {
 		setup: function(el) {
+			data.objects = [];
 			p = new Processing(el);
 			p.tx = tx;
 			p.ty = ty;
@@ -173,18 +174,18 @@ var hamapp = Backbone.View.extend({
 		this.template = Handlebars.compile($("#main-page").html());
 		this.variables = {
 			"mode": "intro",
-			"color": "red",
+			"color": "FF0000FF",
 			"algo": "cut2",
 			"display_canvas": true,
 			"help_title": "Introduction",
 			"help_text": "wazup lorem ipsum",
 			"print_debug": true,
+			"tool": "point",
 		};
 
-		this.default_pts = {
-			red_points: [{x:1, y:2}, {x:-1, y:-3}, {x:-2.3, y:5}],
-			blue_points: [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}],
-		}
+		this.points = [];
+		this.lines = [];
+		this.tmp = undefined;
 
 		this.canvas_engine = new_canvas();
 		this.canvas_engine.set_size(710, 600);
@@ -194,19 +195,35 @@ var hamapp = Backbone.View.extend({
 	render: function() {
 		var html = this.template(this.variables);
 		$(this.el).html(html);
+
 		if (this.variables.display_canvas) {
-			this.canvas_engine.setup(document.getElementById('render-zone'));
-			this.canvas_engine.draw();
+			ce = this.canvas_engine;
+			ce.setup(document.getElementById('render-zone'));
+
+			$(this.points).each(function(i, o) {
+				ce.add(o);
+			});
+
+			$(this.lines).each(function(i, o) {
+				ce.add(o);
+			});
+
+			if (this.tmp != undefined)
+				ce.add(point(this.tmp.x, this.tmp.y, "00FF00FF"));
+
+			ce.draw();
 		}
 	},
 
 	xy: function(e) {
-		if (this.variables.display_canvas)
+		if (this.variables.display_canvas) {
+			var ce = this.canvas_engine;
+
 			return {
-				x: e.pageX - $("#render-zone").offset().left,
-				y: e.pageY - $("#render-zone").offset().top,
+				x: ce.dx(e.pageX - $("#render-zone").offset().left),
+				y: ce.dy(e.pageY - $("#render-zone").offset().top),
 			};
-		else
+		} else
 			return {x: 0, y: 0};
 	},
 
@@ -228,16 +245,33 @@ var hamapp = Backbone.View.extend({
 
 		"click #render-zone": function(e) {
 			var pos = this.xy(e);
-			this.canvas_engine.add(point(
-				this.canvas_engine.dx(pos.x),
-				this.canvas_engine.dy(pos.y),
-				this.variables.color
-			));
-			this.canvas_engine.draw();
+
+			if (this.variables.mode == "editor") {
+				if (this.variables.tool == "point")
+					this.points.push(point(pos.x, pos.y, this.variables.color));
+
+				if (this.variables.tool == "line") {
+					if (this.tmp == undefined) {
+						// first point of line
+						this.tmp = {x: pos.x, y: pos.y};
+					} else {
+						// second point of line
+						var a = (this.tmp.y - pos.y) / (this.tmp.x - pos.x);
+						this.lines.push(line(
+							a,
+							pos.y - a * pos.x,
+							this.variables.color
+						));
+						this.tmp = undefined;
+					}
+				}
+			}
+			this.render();
 		},
 
 		"click #a-intro": function() {
 			this.variables.mode = "intro";
+			this.tmp = undefined;
 			this.render();
 		},
 
@@ -258,37 +292,57 @@ var hamapp = Backbone.View.extend({
 			this.render();
 		},
 
-		"click #a-algo": function() {
-			this.variables.mode = "algo";
+		"click #a-point": function() {
+			this.variables.mode = "editor";
+			this.variables.tool = "point";
+			this.tmp = undefined;
+			this.render();
+		},
+
+		"click #a-line": function() {
+			this.variables.mode = "editor";
+			this.variables.tool = "line";
+			this.tmp = undefined;
 			this.render();
 		},
 
 		"click #a-clear": function() {
-			this.canvas_engine.clear();
-			this.canvas_engine.draw();
+			this.points = [];
+			this.lines = [];
+			this.tmp = undefined;
+			this.render();
+		},
+
+		"click #a-algo": function() {
+			this.variables.mode = "algo";
+			this.tmp = undefined;
+			this.render();
 		},
 
 		"click #a-cut2": function() {
 			this.variables.mode = "algo";
 			this.variables.algo = "cut2";
-			var ce = this.canvas_engine;
+			this.tmp = undefined;
 
-			ce.clear();
-			$(this.default_pts.red_points).each(function(i, p) {
-				ce.add(point(p.x, p.y, "FF0000FF"));
-			});
-			$(this.default_pts.blue_points).each(function(i, p) {
-				ce.add(point(p.x, p.y, "0000FFFF"));
-			});
-			$(this.default_pts.red_points).each(function(i, p) {
-				ce.add(point(p.x, p.y, "FF0000FF").dual());
-			});
-			$(this.default_pts.blue_points).each(function(i, p) {
-				ce.add(point(p.x, p.y, "0000FFFF").dual());
+			reds = [{x:1, y:2}, {x:-1, y:-3}, {x:-2.3, y:5}];
+			blues = [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}];
+
+			this.points = [];
+			this.line = [];
+			self = this;
+
+			$(reds).each(function(i, p) {
+				self.points.push(point(p.x, p.y, "FF0000FF"));
+				self.lines.push(point(p.x, p.y, "FF0000FF").dual());
 			});
 
-			i = this.intersection(this.default_pts.red_points[1], this.default_pts.red_points[2]);
-			ce.add(point(i.x, i.y, "00FF00FF"));
+			$(blues).each(function(i, p) {
+				self.points.push(point(p.x, p.y, "0000FFFF"));
+				self.lines.push(point(p.x, p.y, "0000FFFF").dual());
+			});
+
+			i = this.intersection(reds[1], reds[2]);
+			this.points.push(point(i.x, i.y, "00FF00FF"));
 			this.render();
 		}
 	}
