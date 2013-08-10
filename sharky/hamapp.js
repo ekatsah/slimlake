@@ -71,6 +71,55 @@ var line = function(na, nb, ncolor) {
 	};
 };
 
+
+// Polygon, list of points
+var polygon = function(npoints, ncolor, nclosed) {
+	var points = npoints, color = ncolor;
+
+	if (nclosed != undefined)
+		var closed = nclosed;
+	else
+		var closed = true;
+
+	return {
+		add: function(pt) {
+			points.push(pt);
+		},
+
+		draw: function(p) {
+			p.noStroke();
+			p.fill(
+				parseInt(color[0] + color[1], 16),
+				parseInt(color[2] + color[3], 16),
+				parseInt(color[4] + color[5], 16),
+				parseInt(color[6] + color[7], 16) / 4
+			);
+			p.beginShape();
+			$(points).each(function(i, o) {
+				p.vertex(p.tx(o.x()), p.ty(o.y()));
+			});
+			p.endShape();
+
+			p.stroke(
+				parseInt(color[0] + color[1], 16),
+				parseInt(color[2] + color[3], 16),
+				parseInt(color[4] + color[5], 16),
+				parseInt(color[6] + color[7], 16)
+			);
+			$(points).each(function(i, o) {
+				if (i > 0)
+					p.line(p.tx(o.x()), p.ty(o.y()), 
+						p.tx(points[i - 1].x()), p.ty(points[i - 1].y()));
+			});
+
+			var len = points.length;
+			if (closed && len > 1)
+				p.line(p.tx(points[0].x()), p.ty(points[0].y()),
+						p.tx(points[len - 1].x()), p.ty(points[len - 1].y()));
+		},
+	};
+}
+
 /*
 	Next, we need a rendering engine
 */
@@ -181,10 +230,12 @@ var hamapp = Backbone.View.extend({
 			"help_text": "wazup lorem ipsum",
 			"print_debug": true,
 			"tool": "point",
+			"menu_polygon": false,
 		};
 
 		this.points = [];
 		this.lines = [];
+		this.polys = [];
 		this.tmp = undefined;
 
 		this.canvas_engine = new_canvas();
@@ -193,6 +244,11 @@ var hamapp = Backbone.View.extend({
 	},
 
 	render: function() {
+		this.variables.menu_polygon = (
+			this.variables.mode == "editor" &&
+			this.variables.tool == "poly" &&
+			this.tmp != undefined && this.tmp.length > 2);
+
 		var html = this.template(this.variables);
 		$(this.el).html(html);
 
@@ -208,8 +264,13 @@ var hamapp = Backbone.View.extend({
 				ce.add(o);
 			});
 
-			if (this.tmp != undefined)
-				ce.add(point(this.tmp.x, this.tmp.y, "00FF00FF"));
+			$(this.polys).each(function(i, o) {
+				ce.add(o);
+			});
+
+			$(this.tmp).each(function(i, o) {
+				ce.add(point(o.x, o.y, "00FF00FF"));
+			});
 
 			ce.draw();
 		}
@@ -253,10 +314,10 @@ var hamapp = Backbone.View.extend({
 				if (this.variables.tool == "line") {
 					if (this.tmp == undefined) {
 						// first point of line
-						this.tmp = {x: pos.x, y: pos.y};
+						this.tmp = [{x: pos.x, y: pos.y}];
 					} else {
 						// second point of line
-						var a = (this.tmp.y - pos.y) / (this.tmp.x - pos.x);
+						var a = (this.tmp[0].y - pos.y) / (this.tmp[0].x - pos.x);
 						this.lines.push(line(
 							a,
 							pos.y - a * pos.x,
@@ -264,6 +325,12 @@ var hamapp = Backbone.View.extend({
 						));
 						this.tmp = undefined;
 					}
+				}
+
+				if (this.variables.tool == "poly") {
+					if (this.tmp == undefined)
+						this.tmp = [];
+					this.tmp.push({x: pos.x, y: pos.y});
 				}
 			}
 			this.render();
@@ -306,9 +373,39 @@ var hamapp = Backbone.View.extend({
 			this.render();
 		},
 
+		"click #a-poly": function() {
+			this.variables.mode = "editor";
+			this.variables.tool = "poly";
+			this.tmp = undefined;
+			this.render();
+		},
+
+		"click #a-open": function() {
+			var pts = [], color = this.variables.color;
+			
+			$(this.tmp).each(function(i, pt) {
+				pts.push(point(pt.x, pt.y, color));
+			});
+			this.polys.push(polygon(pts, color, false));
+			this.tmp = undefined;
+			this.render();
+		},
+
+		"click #a-close": function() {
+			var pts = [], color = this.variables.color;
+
+			$(this.tmp).each(function(i, pt) {
+				pts.push(point(pt.x, pt.y, color));
+			});
+			this.polys.push(polygon(pts, color, true));
+			this.tmp = undefined;
+			this.render();
+		},
+
 		"click #a-clear": function() {
 			this.points = [];
 			this.lines = [];
+			this.poly = [];
 			this.tmp = undefined;
 			this.render();
 		},
@@ -329,6 +426,7 @@ var hamapp = Backbone.View.extend({
 
 			this.points = [];
 			this.line = [];
+			this.polys = [];
 			self = this;
 
 			$(reds).each(function(i, p) {
