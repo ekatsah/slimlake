@@ -94,6 +94,17 @@ var polygon = function(npoints, ncolor, nclosed) {
 	else
 		var closed = true;
 
+	var edges = function() {
+		// return _all_ edges, assume polygon is closed
+		edges = [];
+		$(points).each(function(i, o) {
+			if (i > 0)
+				edges.push(line_from_2points(points[i - 1], o, color));
+		});
+		edges.push(line_from_2points(points[points.length - 1], points[0], color));
+		return edges;
+	};
+
 	return {
 		add: function(pt) {
 			points.push(pt);
