@@ -246,7 +246,84 @@ var polygon = function(npoints, ncolor, nclosed) {
 			return intersection % 2 == 1;
 		},
 	};
-}
+};
+
+var klevel = function(lineset, k, ncolor) {
+	var color = ncolor;
+	var lines = [], lines_x = [];
+
+	// helper to select the k-eime line in a set, for a coord x
+	var get_kline = function(k, lines, x) {
+		if (k < 0 || k > lines.length - 1)
+			return undefined;
+
+		var vl = vline(x, "00AA00FF");
+		var vinter = [];
+		$(lines).each(function(i, l) {
+			vinter.push([vl.intersection(l), l]);
+		});
+		vinter.sort(function(t1, t2) {
+			return t1[0].y() - t2[0].y();
+		});
+		return vinter[k][1];
+	};
+
+	// first, compute all intersections of the lines
+	var intersections = [];
+	$(lineset).each(function(i, l1) {
+		$(lineset.slice(i + 1, lineset.lenght)).each(function(i, l2) {
+			intersections.push(l1.intersection(l2, "00FF00FF"));
+		});
+	});
+
+	// sort the intersections by x()
+	intersections.sort(function(p1, p2) {
+		return p1.x() - p2.x();
+	});
+
+	lines.push(get_kline(k, lineset, intersections[0].x() - 1));
+	lines_x.push(intersections[0].x());
+	for (var i = 1; i < intersections.length; ++i) {
+		lines.push(get_kline(k, lineset, (intersections[i - 1].x() + intersections[i].x()) / 2));
+		lines_x.push(intersections[i].x());
+	}
+	lines.push(get_kline(k, lineset, intersections[i - 1].x() + 1));
+
+	// removing the interferences
+	for (var i = 1; i < lines_x.length; ++i)
+		if (lines[i] == lines[i-1]) {
+			lines.splice(i, 1);
+			lines_x.splice(i - 1, 1);
+			--i;
+		}
+
+	return {
+		draw: function(p) {
+			p.stroke(
+				parseInt(color[0] + color[1], 16),
+				parseInt(color[2] + color[3], 16),
+				parseInt(color[4] + color[5], 16),
+				parseInt(color[6] + color[7], 16)
+			);
+
+			if (lines_x[0] > -20)
+				p.line(p.tx(-20), p.ty(lines[0].f(-20)),
+						p.tx(lines_x[0]), p.ty(lines[0].f(lines_x[0])));
+
+			for (var i = 1; i < lines_x.length; ++i) {
+				var x1 = lines_x[i - 1], x2 = lines_x[i];
+				var line = lines[i];
+
+				p.line(p.tx(x1), p.ty(line.f(x1)),
+						p.tx(x2), p.ty(line.f(x2)));
+			}
+			line = lines[i];
+			p.line(p.tx(x2), p.ty(line.f(x2)),
+					p.tx(20), p.ty(line.f(20)));
+		},
+	};
+};
+
 
 /*
 	Next, we need a rendering engine
@@ -649,105 +726,24 @@ var hamapp = Backbone.View.extend({
 			this.polys = [];
 			self = this;
 
-			reds = [{x:1, y:2}, {x:-1, y:-3}, {x: 0.5, y: -5}];
-			blues = [{x:-1.5, y:2.5}, {x: -0.7, y: -1}, {x: 0.1, y: 4}, {x: 0.5, y: -1.4}, {x:0.9, y: 2}];
+			var reds = [{x:1, y:2}, {x:-1, y:-3}, {x: 0.5, y: -5}];
+			var blues = [{x:-1.5, y:2.5}, {x: -0.7, y: -1}, {x: 0.1, y: 4}, {x: 0.5, y: -1.4}, {x:0.9, y: 2}];
+			var redline = [], blueline = [];
 
-		/*	$(reds).each(function(i, p) {
-				self.points.push(point(p.x, p.y, "FF0000FF"));
+			$(reds).each(function(i, p) {
+		//		self.points.push(point(p.x, p.y, "FF0000FF"));
 				self.lines.push(point(p.x, p.y, "FF0000FF").dual());
-			});*/
+				redline.push(point(p.x, p.y, "FF0000FF").dual());
+			});
 
 			$(blues).each(function(i, p) {
 		//		self.points.push(point(p.x, p.y, "0000FFFF"));
 				self.lines.push(point(p.x, p.y, "0000FFFF").dual());
+				blueline.push(point(p.x, p.y, "0000FFFF").dual());
 			});
 
-			// helpers
-			var print_lineset = function(s) {
-				console.log("print lineset");
-				$(s).each(function(i, l) {
-					console.log(" [" + i + "] : " + l.str() + ", color = " + l.color());
-				});
-			};
-
-			var union = function(set1, set2) {
-				return _.clone(set1.concat(set2));
-			};
-
-			// select all intersections
-			var I = [];
-			$(self.lines).each(function(i, l1) {
-				$(self.lines.slice(i + 1, self.lines.lenght)).each(function(i, l2) {
-					I.push(l1.intersection(l2, "00FF00FF"));
-				});
-			});
-
-			I.sort(function(p1, p2) {
-				return p1.x() - p2.x();
-			});
-			self.points = I;
-
-			console.log(I[0].str());
-
-			var get_kline = function(k, lines, x) {
-				if (k < 0 || k > lines.length - 1)
-					return undefined;
-
-				var vl = vline(x, "00AA00FF");
-				var vinter = [];
-				$(lines).each(function(i, l) {
-					vinter.push([vl.intersection(l), l]);
-				});
-				vinter.sort(function(t1, t2) {
-					return t1[0].y() - t2[0].y();
-				});
-				return vinter[k][1];
-			};
-
-			// two sets : L lines of length m and Lx of x() of length m-1
-			var L = [], Lx = [], k = 2;
-			L.push(get_kline(k, self.lines, I[0].x() - 1));
-			Lx.push(I[0].x());
-			for (var i = 1; i < I.length; ++i) {
-				L.push(get_kline(k, self.lines, (I[i - 1].x() + I[i].x()) / 2));
-				Lx.push(I[i].x());
-			}
-			L.push(get_kline(k, self.lines, I[i - 1].x() + 1));
-
-			// removing the interferences
-			for (var i = 1; i < Lx.length; ++i)
-				if (L[i] == L[i-1]) {
-					L.splice(i, 1);
-					Lx.splice(i - 1, 1);
-					--i;
-				}
-
-			// generate drawing
-			var path = function(nL, nLx) {
-				var L = nL, Lx = nLx;
-
-				return {
-					draw: function(p) {
-						p.stroke(0);
-						if (Lx[0] > -20)
-							p.line(p.tx(-20), p.ty(L[0].f(-20)), p.tx(Lx[0]), p.ty(L[0].f(Lx[0])));
-						for (var i = 1; i < Lx.length; ++i) {
-							var x1 = Lx[i - 1], x2 = Lx[i];
-							var line = L[i];
-
-							p.line(p.tx(x1), p.ty(line.f(x1)), p.tx(x2), p.ty(line.f(x2)));
-						}
-						line = L[i];
-						p.line(p.tx(x2), p.ty(line.f(x2)), p.tx(20), p.ty(line.f(20)));
-					},
-				};
-			}(L, Lx);
-			self.polys.push(path);
-			
-		//	var v1 = get_kline(0, self.lines, I[0].x() - 1);
-		//	v1.color("FF0000FF");
-		//	self.lines.push(v1);
-		//	self.points.push(v1.intersection(self.lines[2]));
+			self.polys.push(new klevel(redline, 2, "00FF00FF"));
+			self.polys.push(new klevel(blueline, 2, "888800FF"));
 		},
 	},
 });
