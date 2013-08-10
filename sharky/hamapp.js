@@ -46,6 +46,10 @@ var point = function(nx, ny, ncolor) {
 var line = function(na, nb, ncolor) {
 	var a = na, b = nb, color = ncolor;
 
+	var str = function() {
+		return "y = " + a.toFixed(2) + " * x + " + b.toFixed(2);
+	};
+
 	return {
 		a: function(w) {
 			if (w != undefined)
@@ -62,6 +66,8 @@ var line = function(na, nb, ncolor) {
 		dual: function() {
 			return point(a, b, color);
 		},
+
+		str: str,
 
 		draw: function(p) {
 			p.stroke(
