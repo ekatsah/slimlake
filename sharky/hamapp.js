@@ -350,13 +350,13 @@ var hamapp = Backbone.View.extend({
 						// first point of line
 						this.tmp = [{x: pos.x, y: pos.y}];
 					} else {
-						// second point of line
-						var a = (this.tmp[0].y - pos.y) / (this.tmp[0].x - pos.x);
-						this.lines.push(line(
-							a,
-							pos.y - a * pos.x,
-							this.variables.color
-						));
+						this.lines.push(
+							line_from_2points(
+								point(this.tmp[0].x, this.tmp[0].y, this.variables.color),
+								point(pos.x, pos.y, this.variables.color),
+								this.variables.color
+							)
+						);
 						this.tmp = undefined;
 					}
 				}
