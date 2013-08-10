@@ -161,6 +161,11 @@ var hamapp = Backbone.View.extend({
 			return {x: 0, y: 0};
 	},
 
+	intersection: function(line1, line2) {
+		var x = (line2.y - line1.y) / (line1.x - line2.x);
+		return {x: x, y: line1.x * x + line1.y};
+	},
+
 	events: {
 		"click #mask-canvas": function() {
 			this.variables.display_canvas = false;
@@ -247,6 +252,13 @@ var hamapp = Backbone.View.extend({
 					x: p.x,
 					y: p.y,
 				});
+			});
+
+			i = this.intersection(this.data.red_points[1], this.data.red_points[2]);
+			ce.add_point({
+				color: "green",
+				x: -i.x,
+				y: -i.y,
 			});
 
 			this.render();
