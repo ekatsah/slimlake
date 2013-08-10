@@ -79,16 +79,21 @@ var line = function(na, nb, ncolor) {
 			p.line(p.tx(-18), p.ty(-18 * a + b), p.tx(18), p.ty(18 * a + b));
 		},
 
-		intersection: function(l) {
+		intersection: function(l, ncolor) {
 			// return point of intersection between two lines
-			// color of the point is the same as this line
+			// color of the point is the same as this line, if not set
 
 			if (a == l.a())
 				return undefined; // no intersection
 
+			if (ncolor == undefined)
+				var ncolor = color;
+
 			var x = (l.b() - b) / (a - l.a());
-			return point(x, a * x + b, color);
+			return point(x, a * x + b, ncolor);
 		},
+
+		color: function() { return color; },
 	};
 };
 
