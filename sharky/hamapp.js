@@ -68,6 +68,7 @@ var line = function(na, nb, ncolor) {
 		},
 
 		str: str,
+		is_vline: false,
 
 		draw: function(p) {
 			p.stroke(
@@ -83,17 +84,55 @@ var line = function(na, nb, ncolor) {
 			// return point of intersection between two lines
 			// color of the point is the same as this line, if not set
 
+			if (ncolor == undefined)
+				var ncolor = color;
+
+			if (l.is_vline)
+				return point(l.x(), l.x() * a + b, ncolor);
+
 			if (a == l.a())
 				return undefined; // no intersection
 
-			if (ncolor == undefined)
-				var ncolor = color;
 
 			var x = (l.b() - b) / (a - l.a());
 			return point(x, a * x + b, ncolor);
 		},
 
 		color: function() { return color; },
+	};
+};
+
+var vline = function(nx, ncolor) {
+	var x = nx, color = ncolor;
+
+	var str = function() {
+		return "x = " + x.toFixed(2);
+	};
+
+	return {
+		str: str,
+		is_vline: true,
+		x: function() { return x; },
+
+		draw: function(p) {
+			p.stroke(
+				parseInt(color[0] + color[1], 16),
+				parseInt(color[2] + color[3], 16),
+				parseInt(color[4] + color[5], 16),
+				parseInt(color[6] + color[7], 16)
+			);
+			p.line(p.tx(x), p.ty(-20), p.tx(x), p.ty(20));
+		},
+
+		intersection: function(line, ncolor) {
+			if (ncolor == undefined)
+				var ncolor = color;
+
+			if (line.is_vline)
+				return undefined;
+			else
+				return point(x, line.a() * x + line.b(), ncolor);
+		},
 	};
 };
 
