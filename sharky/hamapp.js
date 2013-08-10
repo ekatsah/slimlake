@@ -611,9 +611,96 @@ var hamapp = Backbone.View.extend({
 			print_lineset(gminus);
 			print_lineset(gplus);
 
+			// print M
 			$(M).each(function(i, p) {
 				self.points.push(p);
 			});
-		}
-	}
+
+			// we need to find v*
+			M.sort(function(p1, p2) {
+				return p1.x() - p2.x();
+			});
+			// 2 cases : M odd, then v* is the middle line
+			//           M even, then v* is between 2 middle points
+			if (M.length % 2 == 0)
+				var vx = (M[M.length/2].x() + M[M.length/2 - 1].x()) / 2;
+			else
+				var vx = M[Math.floor(M.length/2)].x();
+
+			self.lines.push(vline(vx, "ee8800FF"));
+		},
+
+		"click #a-klevel": function() {
+			this.variables.mode = "algo";
+			this.variables.algo = "klevel";
+			this.tmp = undefined;
+
+			// general data
+			this.points = [];
+			this.lines = [];
+			this.polys = [];
+			self = this;
+
+			reds = [{x:1, y:2}, {x:-1, y:-3}, {x: 0.5, y: -5}];
+			blues = [{x:-1.5, y:2.5}, {x: -0.7, y: -1}, {x: 0.1, y: 4}, {x: 0.5, y: -1.4}, {x:0.9, y: 2}];
+
+		/*	$(reds).each(function(i, p) {
+				self.points.push(point(p.x, p.y, "FF0000FF"));
+				self.lines.push(point(p.x, p.y, "FF0000FF").dual());
+			});*/
+
+			$(blues).each(function(i, p) {
+		//		self.points.push(point(p.x, p.y, "0000FFFF"));
+				self.lines.push(point(p.x, p.y, "0000FFFF").dual());
+			});
+
+			// helpers
+			var print_lineset = function(s) {
+				console.log("print lineset");
+				$(s).each(function(i, l) {
+					console.log(" [" + i + "] : " + l.str() + ", color = " + l.color());
+				});
+			};
+
+			var union = function(set1, set2) {
+				return _.clone(set1.concat(set2));
+			};
+
+			// select all intersections
+			var I = [];
+			$(self.lines).each(function(i, l1) {
+				$(self.lines.slice(i + 1, self.lines.lenght)).each(function(i, l2) {
+					I.push(l1.intersection(l2, "00FF00FF"));
+				});
+			});
+
+			I.sort(function(p1, p2) {
+				return p1.x() - p2.x();
+			});
+			self.points = I;
+
+			console.log(I[0].str());
+
+			var get_kline = function(k, lines, x) {
+				if (k < 0 || k > lines.length - 1)
+					return undefined;
+
+				var vl = vline(x, "00AA00FF");
+				var vinter = [];
+				$(lines).each(function(i, l) {
+					vinter.push([vl.intersection(l), l]);
+				});
+				vinter.sort(function(t1, t2) {
+					return t1[0].y() - t2[0].y();
+				});
+				return vinter[k][1];
+			};
+
+			// first vline : 
+			var v1 = get_kline(0, self.lines, I[0].x() - 1);
+			v1.color("FF0000FF");
+			self.lines.push(v1);
+		//	self.points.push(v1.intersection(self.lines[2]));
+		},
+	},
 });
