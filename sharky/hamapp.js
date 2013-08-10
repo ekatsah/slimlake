@@ -102,6 +102,24 @@ var line_from_2points = function(p1, p2, color) {
 	return line(a, p1.y() - a * p1.x(), color);
 };
 
+var segment = function(np1, np2, ncolor) {
+	var p1 = np1, p2 = np2, color = ncolor;
+
+	return {
+		draw: function(p) {
+			p.stroke(color);
+			p.line(p1.x(), p1.y(), p2.x(), p2.y());
+		},
+
+		line: function() {
+			return line_from_2points(p1, p2, color);
+		},
+
+		p1: function() { return p1; },
+		p2: function() { return p2; },
+	};
+};
+
 // Polygon, list of points
 var polygon = function(npoints, ncolor, nclosed) {
 	var points = npoints, color = ncolor;
