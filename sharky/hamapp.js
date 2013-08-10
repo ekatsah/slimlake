@@ -704,10 +704,49 @@ var hamapp = Backbone.View.extend({
 				return vinter[k][1];
 			};
 
-			// first vline : 
-			var v1 = get_kline(0, self.lines, I[0].x() - 1);
-			v1.color("FF0000FF");
-			self.lines.push(v1);
+			// two sets : L lines of length m and Lx of x() of length m-1
+			var L = [], Lx = [], k = 2;
+			L.push(get_kline(k, self.lines, I[0].x() - 1));
+			Lx.push(I[0].x());
+			for (var i = 1; i < I.length; ++i) {
+				L.push(get_kline(k, self.lines, (I[i - 1].x() + I[i].x()) / 2));
+				Lx.push(I[i].x());
+			}
+			L.push(get_kline(k, self.lines, I[i - 1].x() + 1));
+
+			// removing the interferences
+			for (var i = 1; i < Lx.length; ++i)
+				if (L[i] == L[i-1]) {
+					L.splice(i, 1);
+					Lx.splice(i - 1, 1);
+					--i;
+				}
+
+			// generate drawing
+			var path = function(nL, nLx) {
+				var L = nL, Lx = nLx;
+
+				return {
+					draw: function(p) {
+						p.stroke(0);
+						if (Lx[0] > -20)
+							p.line(p.tx(-20), p.ty(L[0].f(-20)), p.tx(Lx[0]), p.ty(L[0].f(Lx[0])));
+						for (var i = 1; i < Lx.length; ++i) {
+							var x1 = Lx[i - 1], x2 = Lx[i];
+							var line = L[i];
+
+							p.line(p.tx(x1), p.ty(line.f(x1)), p.tx(x2), p.ty(line.f(x2)));
+						}
+						line = L[i];
+						p.line(p.tx(x2), p.ty(line.f(x2)), p.tx(20), p.ty(line.f(20)));
+					},
+				};
+			}(L, Lx);
+			self.polys.push(path);
+			
+		//	var v1 = get_kline(0, self.lines, I[0].x() - 1);
+		//	v1.color("FF0000FF");
+		//	self.lines.push(v1);
 		//	self.points.push(v1.intersection(self.lines[2]));
 		},
 	},
