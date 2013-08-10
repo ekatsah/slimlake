@@ -364,11 +364,6 @@ var hamapp = Backbone.View.extend({
 			return {x: 0, y: 0};
 	},
 
-	intersection: function(line1, line2) {
-		var x = (line2.y - line1.y) / (line1.x - line2.x);
-		return {x: x, y: line1.x * x + line1.y};
-	},
-
 	events: {
 		"click": function() {
 			this.render();
