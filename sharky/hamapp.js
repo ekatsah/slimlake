@@ -54,13 +54,13 @@ var line = function(na, nb, ncolor) {
 		a: function(w) {
 			if (w != undefined)
 				a = w;
-			return w;
+			return a;
 		},
 
 		b: function(w) {
 			if (w != undefined)
 				b = w;
-			return w;
+			return b;
 		},
 
 		dual: function() {
