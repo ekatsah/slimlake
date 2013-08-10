@@ -141,6 +141,14 @@ var polygon = function(npoints, ncolor, nclosed) {
 				p.line(p.tx(points[0].x()), p.ty(points[0].y()),
 						p.tx(points[len - 1].x()), p.ty(points[len - 1].y()));
 		},
+
+		is_inside: function(point) {
+			var intersection = 0;
+
+			$(edges()).each(function(i, e) {
+				ipt = e.intersection(line(0, point.y(), ""));
+			});
+		},
 	};
 }
 
@@ -439,9 +447,13 @@ var hamapp = Backbone.View.extend({
 			if (this.points.length != 1 &&
 					this.polys.length != 1) {
 				this.variables.help_text = "error in input variables";
-				this.render();
 				return;
 			}
+
+			if (this.polys[0].is_inside(this.points[0]))
+				this.variables.help_text = "the point " + this.points[0].str() + " is inside";
+			else
+				this.variables.help_text = "the point " + this.points[0].str() + " is outside";
 		},
 
 		"click #a-cut2": function() {
