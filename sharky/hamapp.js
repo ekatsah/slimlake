@@ -416,6 +416,22 @@ var hamapp = Backbone.View.extend({
 			this.render();
 		},
 
+		"click #a-inside": function() {
+			this.variables.mode = "algo";
+			this.variables.algo = "inside";
+			this.tmp = undefined;
+
+			// check if point is inside a polygon
+			if (this.points.length != 1 &&
+					this.polys.length != 1) {
+				this.variables.help_text = "error in input variables";
+				this.render();
+				return;
+			}
+
+			this.render();
+		},
+
 		"click #a-cut2": function() {
 			this.variables.mode = "algo";
 			this.variables.algo = "cut2";
