@@ -294,14 +294,16 @@ var hamapp = Backbone.View.extend({
 	},
 
 	events: {
+		"click": function() {
+			this.render();
+		},
+
 		"click #mask-canvas": function() {
 			this.variables.display_canvas = false;
-			this.render();
 		},
 
 		"click #show-canvas": function() {
 			this.variables.display_canvas = true;
-			this.render();
 		},
 
 		"click #render-zone": function(e) {
@@ -333,51 +335,43 @@ var hamapp = Backbone.View.extend({
 					this.tmp.push({x: pos.x, y: pos.y});
 				}
 			}
-			this.render();
 		},
 
 		"click #a-intro": function() {
 			this.variables.mode = "intro";
 			this.tmp = undefined;
-			this.render();
 		},
 
 		"click #a-editor": function() {
 			this.variables.mode = "editor";
-			this.render();
 		},
 
 		"click #a-red": function() {
 			this.variables.mode = "editor";
 			this.variables.color = "FF0000FF";
-			this.render();
 		},
 
 		"click #a-blue": function() {
 			this.variables.mode = "editor";
 			this.variables.color = "0000FFFF";
-			this.render();
 		},
 
 		"click #a-point": function() {
 			this.variables.mode = "editor";
 			this.variables.tool = "point";
 			this.tmp = undefined;
-			this.render();
 		},
 
 		"click #a-line": function() {
 			this.variables.mode = "editor";
 			this.variables.tool = "line";
 			this.tmp = undefined;
-			this.render();
 		},
 
 		"click #a-poly": function() {
 			this.variables.mode = "editor";
 			this.variables.tool = "poly";
 			this.tmp = undefined;
-			this.render();
 		},
 
 		"click #a-open": function() {
@@ -388,7 +382,6 @@ var hamapp = Backbone.View.extend({
 			});
 			this.polys.push(polygon(pts, color, false));
 			this.tmp = undefined;
-			this.render();
 		},
 
 		"click #a-close": function() {
@@ -399,7 +392,6 @@ var hamapp = Backbone.View.extend({
 			});
 			this.polys.push(polygon(pts, color, true));
 			this.tmp = undefined;
-			this.render();
 		},
 
 		"click #a-clear": function() {
@@ -407,13 +399,11 @@ var hamapp = Backbone.View.extend({
 			this.lines = [];
 			this.poly = [];
 			this.tmp = undefined;
-			this.render();
 		},
 
 		"click #a-algo": function() {
 			this.variables.mode = "algo";
 			this.tmp = undefined;
-			this.render();
 		},
 
 		"click #a-inside": function() {
@@ -428,8 +418,6 @@ var hamapp = Backbone.View.extend({
 				this.render();
 				return;
 			}
-
-			this.render();
 		},
 
 		"click #a-cut2": function() {
@@ -457,7 +445,6 @@ var hamapp = Backbone.View.extend({
 
 			i = this.intersection(reds[1], reds[2]);
 			this.points.push(point(i.x, i.y, "00FF00FF"));
-			this.render();
 		}
 	}
 });
