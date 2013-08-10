@@ -1,7 +1,83 @@
+
+/*
+	First, some standard types
+*/
+
+// point on (x; y) with color
+var point = function(nx, ny, ncolor) {
+	var x = nx, y = ny, color = ncolor;
+
+	return {
+		x: function(a) {
+			if (a != undefined)
+				x = a;
+			return x;
+		},
+
+		y: function(a) {
+			if (a != undefined)
+				y = a;
+			return y;
+		},
+
+		dual: function() {
+			return line(x, y, color);
+		},
+
+		draw: function(p) {
+			p.noStroke();
+			p.fill(
+				parseInt(color[0] + color[1], 16),
+				parseInt(color[2] + color[3], 16),
+				parseInt(color[4] + color[5], 16),
+				parseInt(color[6] + color[7], 16)
+			);
+			p.ellipse(p.tx(x), p.ty(y), 7, 7);
+		},
+	};
+};
+
+
+// line y = ax + b with color
+var line = function(na, nb, ncolor) {
+	var a = na, b = nb, color = ncolor;
+
+	return {
+		a: function(w) {
+			if (w != undefined)
+				a = w;
+			return w;
+		},
+
+		b: function(w) {
+			if (w != undefined)
+				b = w;
+			return w;
+		},
+
+		dual: function() {
+			return point(a, b, color);
+		},
+
+		draw: function(p) {
+			p.stroke(
+				parseInt(color[0] + color[1], 16),
+				parseInt(color[2] + color[3], 16),
+				parseInt(color[4] + color[5], 16),
+				parseInt(color[6] + color[7], 16)
+			);
+			p.line(p.tx(-18), p.ty(-18 * a + b), p.tx(18), p.ty(18 * a + b));
+		},
+	};
+};
+
+/*
+	Next, we need a rendering engine
+*/
+
 new_canvas = function() {
 	var data = {
-		points: [],
-		lines: [],
+		objects: [],
 		width: 100,
 		height: 100,
 	};
@@ -26,6 +102,8 @@ new_canvas = function() {
 	return {
 		setup: function(el) {
 			p = new Processing(el);
+			p.tx = tx;
+			p.ty = ty;
 			p.smooth();
 			p.size(data.width, data.height);
 			p.noLoop();
@@ -47,63 +125,34 @@ new_canvas = function() {
 			p.line(data.width/2, 0, data.width/2, data.height);
 			p.line(0, data.height/2, data.width, data.height/2);
 
-			// draw points
-			p.noStroke();
-			$(data.points).each(function(i, point) {
-				if (point.color == "red")
-					p.fill(255, 0, 0);
-				else if (point.color == "blue")
-					p.fill(0, 0, 255);
-				else if (point.color == "green")
-					p.fill(0, 255, 0);
-				else
-					p.fill(0, 0, 0);
-
-				p.ellipse(tx(point.x), ty(point.y), 7, 7);
-			});
-
-			// draw lines
-			$(data.lines).each(function(i, line) {
-				if (line.color == "red")
-					p.stroke(255, 0, 0);
-				else if (line.color == "blue")
-					p.stroke(0, 0, 255);
-				else if (line.color == "green")
-					p.stroke(0, 255, 0);
-				else
-					p.stroke(0, 0, 0);
-
-				p.line(tx(-10), ty(line.x * -10 - line.y), tx(10), ty(line.x * 10 - line.y));
+			// draw objects
+			$(data.objects).each(function(i, o) {
+				o.draw(p);
 			});
 		},
 
-		add_point: function(p) {
-			data.points.push(p);
+		add: function(o) {
+			data.objects.push(o);
 		},
 
-		add_line: function(l) {
-			data.lines.push(l);
+		objects: function(o) {
+			data.objects = _.clone(o);
 		},
 
-		points: function(p) {
-			data.points = _.clone(p);
-		},
-
-		lines: function(l) {
-			data.lines = _.clone(p);
+		clear: function() {
+			data.objects = [];
 		},
 
 		set_size: function(new_width, new_height) {
 			data.width = new_width;
 			data.height = new_height;
 		},
-
-		clear: function() {
-			data.points = [];
-			data.lines = [];
-		},
 	};
 };	
+
+/*
+	The application per see
+*/
 
 var hamapp = Backbone.View.extend({
 	initialize: function() {
@@ -132,7 +181,7 @@ var hamapp = Backbone.View.extend({
 			"print_debug": true,
 		};
 
-		this.data = {
+		this.default_pts = {
 			red_points: [{x:1, y:2}, {x:-1, y:-3}, {x:-2.3, y:5}],
 			blue_points: [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}],
 		}
@@ -179,11 +228,11 @@ var hamapp = Backbone.View.extend({
 
 		"click #render-zone": function(e) {
 			var pos = this.xy(e);
-			this.canvas_engine.add_point({
-				color: this.variables.color,
-				x: this.canvas_engine.dx(pos.x),
-				y: this.canvas_engine.dy(pos.y),
-			});
+			this.canvas_engine.add(point(
+				this.canvas_engine.dx(pos.x),
+				this.canvas_engine.dy(pos.y),
+				this.variables.color
+			));
 			this.canvas_engine.draw();
 		},
 
@@ -199,13 +248,13 @@ var hamapp = Backbone.View.extend({
 
 		"click #a-red": function() {
 			this.variables.mode = "editor";
-			this.variables.color = "red";
+			this.variables.color = "FF0000FF";
 			this.render();
 		},
 
 		"click #a-blue": function() {
 			this.variables.mode = "editor";
-			this.variables.color = "blue";
+			this.variables.color = "0000FFFF";
 			this.render();
 		},
 
@@ -225,42 +274,21 @@ var hamapp = Backbone.View.extend({
 			var ce = this.canvas_engine;
 
 			ce.clear();
-			$(this.data.red_points).each(function(i, p) {
-				ce.add_point({
-					color: "red",
-					x: p.x,
-					y: p.y,
-				});
+			$(this.default_pts.red_points).each(function(i, p) {
+				ce.add(point(p.x, p.y, "FF0000FF"));
 			});
-			$(this.data.blue_points).each(function(i, p) {
-				ce.add_point({
-					color: "blue",
-					x: p.x,
-					y: p.y,
-				});
+			$(this.default_pts.blue_points).each(function(i, p) {
+				ce.add(point(p.x, p.y, "0000FFFF"));
 			});
-			$(this.data.red_points).each(function(i, p) {
-				ce.add_line({
-					color: "red",
-					x: p.x,
-					y: p.y,
-				});
+			$(this.default_pts.red_points).each(function(i, p) {
+				ce.add(point(p.x, p.y, "FF0000FF").dual());
 			});
-			$(this.data.blue_points).each(function(i, p) {
-				ce.add_line({
-					color: "blue",
-					x: p.x,
-					y: p.y,
-				});
+			$(this.default_pts.blue_points).each(function(i, p) {
+				ce.add(point(p.x, p.y, "0000FFFF").dual());
 			});
 
-			i = this.intersection(this.data.red_points[1], this.data.red_points[2]);
-			ce.add_point({
-				color: "green",
-				x: -i.x,
-				y: -i.y,
-			});
-
+			i = this.intersection(this.default_pts.red_points[1], this.default_pts.red_points[2]);
+			ce.add(point(i.x, i.y, "00FF00FF"));
 			this.render();
 		}
 	}
