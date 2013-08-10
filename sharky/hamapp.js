@@ -1,7 +1,7 @@
 new_canvas = function() {
 	var data = {
-		red_points: [{x:1, y:2}, {x:-1, y:-3}, {x:-2.3, y:5}],
-		blue_points: [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}],
+		points: [],
+		lines: [],
 		width: 100,
 		height: 100,
 	};
@@ -15,6 +15,14 @@ new_canvas = function() {
 		return data.height/2 - y * 20;
 	};
 
+	var dx = function(rx) {
+		return (rx - data.width/2) / 20;
+	}
+
+	var dy = function(ry) {
+		return (data.height/2 - ry) / 20;
+	}
+
 	return {
 		setup: function(el) {
 			p = new Processing(el);
@@ -22,6 +30,9 @@ new_canvas = function() {
 			p.size(data.width, data.height);
 			p.noLoop();
 		},
+
+		dx: dx,
+		dy: dy,
 
 		draw: function() {
 			if (p == false) {
@@ -31,42 +42,55 @@ new_canvas = function() {
 
 			p.background(255, 255, 255);
 
-			// draw red points
-			p.fill(255, 0, 0);
-			p.noStroke();
-			$(data.red_points).each(function(i, point) {
-				p.ellipse(tx(point.x), ty(point.y), 10, 10);
-			});
-
-			// draw blue points
-			p.fill(0, 0, 255);
-			p.noStroke();
-			$(data.blue_points).each(function(i, point) {
-				p.ellipse(tx(point.x), ty(point.y), 10, 10);
-			});
-
 			// draw pseudo axis
 			p.stroke(0);
 			p.line(data.width/2, 0, data.width/2, data.height);
 			p.line(0, data.height/2, data.width, data.height/2);
 
-			// draw red lines
-			p.stroke(255, 0, 0);
-			$(data.red_points).each(function(i, point) {
-				p.line(tx(-10), ty(point.x * -10 - point.y), tx(10), ty(point.x * 10 - point.y));
+			// draw points
+			p.noStroke();
+			$(data.points).each(function(i, point) {
+				if (point.color == "red")
+					p.fill(255, 0, 0);
+				else if (point.color == "blue")
+					p.fill(0, 0, 255);
+				else if (point.color == "green")
+					p.fill(0, 255, 0);
+				else
+					p.fill(0, 0, 0);
+
+				p.ellipse(tx(point.x), ty(point.y), 7, 7);
 			});
 
-			p.stroke(0, 0, 255);
-			$(data.blue_points).each(function(i, point) {
-				p.line(tx(-10), ty(point.x * -10 - point.y), tx(10), ty(point.x * 10 - point.y));
+			// draw lines
+			$(data.lines).each(function(i, line) {
+				if (line.color == "red")
+					p.stroke(255, 0, 0);
+				else if (line.color == "blue")
+					p.stroke(0, 0, 255);
+				else if (line.color == "green")
+					p.stroke(0, 255, 0);
+				else
+					p.stroke(0, 0, 0);
+
+				p.line(tx(-10), ty(line.x * -10 - line.y), tx(10), ty(line.x * 10 - line.y));
 			});
 		},
 
-		add_point: function(color, x, y) {
-			if (color == "red")
-				data.red_points.push({x: x, y: y});
-			if (color == "blue")
-				data.blue_points.push({x: x, y: y});
+		add_point: function(p) {
+			data.points.push(p);
+		},
+
+		add_line: function(l) {
+			data.lines.push(l);
+		},
+
+		points: function(p) {
+			data.points = _.clone(p);
+		},
+
+		lines: function(l) {
+			data.lines = _.clone(p);
 		},
 
 		set_size: function(new_width, new_height) {
@@ -74,15 +98,10 @@ new_canvas = function() {
 			data.height = new_height;
 		},
 
-		cut2: function() {
-			var G = [];
-			$(data.red_points.concat(data.blue_points)).each(function(i, p) {
-				G.push({x: p.x, y: -p.y});
-			});
-
-			
-			console.log(G);
-		}
+		clear: function() {
+			data.points = [];
+			data.lines = [];
+		},
 	};
 };	
 
@@ -112,6 +131,11 @@ var hamapp = Backbone.View.extend({
 			"help_text": "wazup lorem ipsum",
 			"print_debug": true,
 		};
+
+		this.data = {
+			red_points: [{x:1, y:2}, {x:-1, y:-3}, {x:-2.3, y:5}],
+			blue_points: [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}],
+		}
 
 		this.canvas_engine = new_canvas();
 		this.canvas_engine.set_size(710, 600);
@@ -150,7 +174,11 @@ var hamapp = Backbone.View.extend({
 
 		"click #render-zone": function(e) {
 			var pos = this.xy(e);
-			this.canvas_engine.add_point(this.variables.color, pos.x, pos.y);
+			this.canvas_engine.add_point({
+				color: this.variables.color,
+				x: this.canvas_engine.dx(pos.x),
+				y: this.canvas_engine.dy(pos.y),
+			});
 			this.canvas_engine.draw();
 		},
 
@@ -181,10 +209,46 @@ var hamapp = Backbone.View.extend({
 			this.render();
 		},
 
+		"click #a-clear": function() {
+			this.canvas_engine.clear();
+			this.canvas_engine.draw();
+		},
+
 		"click #a-cut2": function() {
 			this.variables.mode = "algo";
 			this.variables.algo = "cut2";
-			this.canvas_engine.cut2();
+			var ce = this.canvas_engine;
+
+			ce.clear();
+			$(this.data.red_points).each(function(i, p) {
+				ce.add_point({
+					color: "red",
+					x: p.x,
+					y: p.y,
+				});
+			});
+			$(this.data.blue_points).each(function(i, p) {
+				ce.add_point({
+					color: "blue",
+					x: p.x,
+					y: p.y,
+				});
+			});
+			$(this.data.red_points).each(function(i, p) {
+				ce.add_line({
+					color: "red",
+					x: p.x,
+					y: p.y,
+				});
+			});
+			$(this.data.blue_points).each(function(i, p) {
+				ce.add_line({
+					color: "blue",
+					x: p.x,
+					y: p.y,
+				});
+			});
+
 			this.render();
 		}
 	}
