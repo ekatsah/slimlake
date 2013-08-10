@@ -483,7 +483,7 @@ var hamapp = Backbone.View.extend({
 			this.tmp = undefined;
 
 			// check if point is inside a polygon
-			if (this.points.length != 1 &&
+			if (this.points.length != 1 ||
 					this.polys.length != 1) {
 				this.variables.help_text = "error in input variables";
 				return;
