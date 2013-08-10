@@ -63,6 +63,10 @@ var line = function(na, nb, ncolor) {
 			return b;
 		},
 
+		f: function(x) {
+			return a * x + b;
+		},
+
 		dual: function() {
 			return point(a, b, color);
 		},
