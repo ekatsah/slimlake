@@ -78,6 +78,17 @@ var line = function(na, nb, ncolor) {
 			);
 			p.line(p.tx(-18), p.ty(-18 * a + b), p.tx(18), p.ty(18 * a + b));
 		},
+
+		intersection: function(l) {
+			// return point of intersection between two lines
+			// color of the point is the same as this line
+
+			if (a == l.a())
+				return undefined; // no intersection
+
+			var x = (l.b() - b) / (a - l.a());
+			return point(x, a * x + b, color);
+		},
 	};
 };
 
