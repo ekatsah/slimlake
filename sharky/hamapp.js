@@ -34,6 +34,10 @@ var point = function(nx, ny, ncolor) {
 			);
 			p.ellipse(p.tx(x), p.ty(y), 7, 7);
 		},
+
+		str: function() {
+			return "(" + x.toFixed(2) + ", " + y.toFixed(2) + ")";
+		},
 	};
 };
 
