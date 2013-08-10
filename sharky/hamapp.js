@@ -468,7 +468,7 @@ var hamapp = Backbone.View.extend({
 		"click #a-clear": function() {
 			this.points = [];
 			this.lines = [];
-			this.poly = [];
+			this.polys = [];
 			this.tmp = undefined;
 		},
 
