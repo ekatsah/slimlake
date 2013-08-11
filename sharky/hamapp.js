@@ -298,6 +298,14 @@ var klevel = function(lineset, k, ncolor) {
 		}
 
 	return {
+		lines: function() {
+			return lines;
+		},
+
+		offsets: function() {
+			return lines_x;
+		},
+
 		draw: function(p) {
 			p.stroke(
 				parseInt(color[0] + color[1], 16),
@@ -726,7 +734,7 @@ var hamapp = Backbone.View.extend({
 			this.polys = [];
 			self = this;
 
-			var reds = [{x:1, y:2}, {x:-1, y:-3}, {x: 0.5, y: -5}];
+			var reds = [{x:-0.2, y:1}, {x:-1, y:-5}, {x: 0.7, y: -5}];
 			var blues = [{x:-1.5, y:2.5}, {x: -0.7, y: -1}, {x: 0.1, y: 4}, {x: 0.5, y: -1.4}, {x:0.9, y: 2}];
 			var redline = [], blueline = [];
 
@@ -742,8 +750,26 @@ var hamapp = Backbone.View.extend({
 				blueline.push(point(p.x, p.y, "0000FFFF").dual());
 			});
 
-			self.polys.push(new klevel(redline, 2, "00FF00FF"));
-			self.polys.push(new klevel(blueline, 2, "888800FF"));
+			var path1 = klevel(redline, 1, "00FF00FF");
+			var path2 = klevel(blueline, 1, "888800FF");
+			self.polys.push(path1);
+			self.polys.push(path2);
+
+			var breakx = 0;
+			var I = [], offsets1 = path1.offsets(), offsets2 = path2.offsets();
+			$(path1.lines()).each(function(i1, l1) {
+				$(path2.lines()).each(function(i2, l2) {
+					var inter = l1.intersection(l2, "00FFFFFF");
+					if ((i1 == 0 && i2 == 0 && inter.x() < offsets1[0] && inter.x() < offsets2[0]) ||
+							(i1 != 0 && i2 != 0 && inter.x() > offsets1[i1-1] && inter.x() > offsets2[i2-1]
+							 && inter.x() < offsets1[i1] && inter.x() < offsets2[i2]) ||
+							(i1 == path1.lines().length - 1 && inter.x() > offsets1[i1 - 1])) {
+						I.push(inter);
+					}
+				});
+			});
+			//console.log(inter);
+			self.points = I;
 		},
 	},
 });
