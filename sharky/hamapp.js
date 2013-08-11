@@ -252,6 +252,10 @@ var klevel = function(lineset, k, ncolor) {
 	var color = ncolor;
 	var lines = [], lines_x = [];
 
+	k = lineset.length - k;
+	if (k > 0 || k >= lineset.length || lineset.length == 0)
+		return undefined;
+
 	// helper to select the k-eime line in a set, for a coord x
 	var get_kline = function(k, lines, x) {
 		if (k < 0 || k > lines.length - 1)
