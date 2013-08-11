@@ -329,6 +329,27 @@ var klevel = function(lineset, k, ncolor) {
 			p.line(p.tx(x2), p.ty(line.f(x2)),
 					p.tx(20), p.ty(line.f(20)));
 		},
+
+		intersection: function(path, ncolor) {
+			// compute the intersection (points) between this path and the arguments
+
+			if (ncolor == undefined)
+				var ncolor = "00FF00FF";
+
+			var intersections = [], offsets1 = lines_x, offsets2 = path.offsets();
+			$(lines).each(function(i1, l1) {
+				$(path.lines()).each(function(i2, l2) {
+					var inter = l1.intersection(l2, ncolor);
+					if ((i1 == 0 && i2 == 0 && inter.x() < offsets1[0] && inter.x() < offsets2[0]) ||
+							(i1 != 0 && i2 != 0 && inter.x() > offsets1[i1-1] && inter.x() > offsets2[i2-1]
+							 && inter.x() < offsets1[i1] && inter.x() < offsets2[i2]) ||
+							(i1 == lines.length - 1 && inter.x() > offsets1[i1 - 1])) {
+						intersections.push(inter);
+					}
+				});
+			});
+			return intersections;
+		},
 	};
 };
 
@@ -750,26 +771,13 @@ var hamapp = Backbone.View.extend({
 				blueline.push(point(p.x, p.y, "0000FFFF").dual());
 			});
 
-			var path1 = klevel(redline, 1, "00FF00FF");
-			var path2 = klevel(blueline, 1, "888800FF");
+			var path1 = klevel(redline, 2, "00FF00FF");
+			var path2 = klevel(blueline, 2, "888800FF");
 			self.polys.push(path1);
 			self.polys.push(path2);
 
-			var breakx = 0;
-			var I = [], offsets1 = path1.offsets(), offsets2 = path2.offsets();
-			$(path1.lines()).each(function(i1, l1) {
-				$(path2.lines()).each(function(i2, l2) {
-					var inter = l1.intersection(l2, "00FFFFFF");
-					if ((i1 == 0 && i2 == 0 && inter.x() < offsets1[0] && inter.x() < offsets2[0]) ||
-							(i1 != 0 && i2 != 0 && inter.x() > offsets1[i1-1] && inter.x() > offsets2[i2-1]
-							 && inter.x() < offsets1[i1] && inter.x() < offsets2[i2]) ||
-							(i1 == path1.lines().length - 1 && inter.x() > offsets1[i1 - 1])) {
-						I.push(inter);
-					}
-				});
-			});
-			//console.log(inter);
-			self.points = I;
+			pts = path1.intersection(path2, "FF0000FF");
+			self.points = pts;
 		},
 	},
 });
