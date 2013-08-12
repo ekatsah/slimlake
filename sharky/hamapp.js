@@ -760,7 +760,7 @@ var hamapp = Backbone.View.extend({
 				}
 			});
 
-			// compute v
+			// compute v, count the number of left and right points
 			var p_left = 0, p_right = 0;
 			$(k_points).each(function(i, p) {
 				if (p.x() < vstar.x())
@@ -773,12 +773,42 @@ var hamapp = Backbone.View.extend({
 				console.log("left is odd, not right");
 			else if (p_right % 2 == 1 && p_left % 2 == 0)
 				console.log("right is odd, not left");
-			else
+			else {
 				console.log("algorithm error, p_left = " + p_left + " && p_right = " + p_right);
-
+				return;
+			}
 
 			var vothers = [];
-			
+			$(M).each(function(i, p) {
+				if (p_left % 2 == 1 && p.x() > vstar.x())
+					vothers.push(p);
+				if (p_right % 2 == 1 && p.x() < vstar.x())
+					vothers.push(p);
+			});
+
+			vothers.sort(function(p1, p2) {
+				return p1.x() - p2.x();
+			});
+
+			if (vothers.length % 2 == 0)
+				var wbase = point(
+					(vothers[vothers.length/2].x() + vothers[vothers.length/2-1].x()) / 2,
+					(vothers[vothers.length/2].y() + vothers[vothers.length/2-1].y()) / 2,
+					"000000FF"
+				);
+			else
+				var wbase = vothers[Math.floor(vothers.length/2)];
+
+			wstar = line(gstar.a(), wbase.y() - gstar.a() * wbase.x(), "AAAA00FF");
+			self.lines.push(wstar);
+
+
+
+			self.points = vothers;
+			$(vothers).each(function(i, p) {
+				console.log(p.str());
+			});
+
 		//	self.points = k_points;
 
 		//	self.polys.push(path1);
