@@ -668,7 +668,7 @@ var hamapp = Backbone.View.extend({
 			this.polys = [];
 			self = this;
 
-			reds = [{x:1, y:2}, {x:-1, y:-3}, {x: 0.5, y: -5}];
+			reds = [{x:1, y:2}, {x:-1, y:-2.9}, {x: 0.5, y: -5}];
 			blues = [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}, {x: -5, y: -8.4}, {x:-0.4, y: 8}];
 
 			$(reds).each(function(i, p) {
@@ -775,8 +775,8 @@ var hamapp = Backbone.View.extend({
 				blueline.push(point(p.x, p.y, "0000FFFF").dual());
 			});
 
-			var path1 = klevel(redline, 2, "00FF00FF");
-			var path2 = klevel(blueline, 2, "888800FF");
+			var path1 = klevel(redline, 1, "00FF00FF");
+			var path2 = klevel(blueline, 3, "888800FF");
 			self.polys.push(path1);
 			self.polys.push(path2);
 
