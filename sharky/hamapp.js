@@ -745,7 +745,44 @@ var hamapp = Backbone.View.extend({
 			else
 				var vx = M[Math.floor(M.length/2)].x();
 
-			self.lines.push(vline(vx, "ee8800FF"));
+			var vstar = vline(vx, "ee8800FF");
+			self.lines.push(vstar);
+
+			var path1 = klevel(G1, k1, "00FF00FF");
+			var path2 = klevel(G2, k2, "00FF00FF");
+			var k_points = path1.intersection(path2);
+
+			// if v* is on a intersection:
+			$(k_points).each(function(i, p) {
+				if (Math.abs(p.x() - vstar.x()) < 0.0001) {
+					console.log("got a intersection");
+					return;
+				}
+			});
+
+			// compute v
+			var p_left = 0, p_right = 0;
+			$(k_points).each(function(i, p) {
+				if (p.x() < vstar.x())
+					p_left += 1;
+				else
+					p_right += 1;
+			});
+
+			if (p_left % 2 == 1 && p_right % 2 == 0)
+				console.log("left is odd, not right");
+			else if (p_right % 2 == 1 && p_left % 2 == 0)
+				console.log("right is odd, not left");
+			else
+				console.log("algorithm error, p_left = " + p_left + " && p_right = " + p_right);
+
+
+			var vothers = [];
+			
+		//	self.points = k_points;
+
+		//	self.polys.push(path1);
+		//	self.polys.push(path2);
 		},
 
 		"click #a-klevel": function() {
