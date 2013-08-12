@@ -347,7 +347,7 @@ var klevel = function(lineset, k, ncolor) {
 					if ((i1 == 0 && i2 == 0 && inter.x() < offsets1[0] && inter.x() < offsets2[0]) ||
 							(i1 != 0 && i2 != 0 && inter.x() > offsets1[i1-1] && inter.x() > offsets2[i2-1]
 							 && inter.x() < offsets1[i1] && inter.x() < offsets2[i2]) ||
-							(i1 == lines.length - 1 && inter.x() > offsets1[i1 - 1])) {
+							(i1 == lines.length - 1 && i2 == path.lines().length - 1 && inter.x() > offsets1[i1 - 1])) {
 						intersections.push(inter);
 					}
 				});
