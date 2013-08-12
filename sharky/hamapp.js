@@ -253,7 +253,7 @@ var klevel = function(lineset, k, ncolor) {
 	var lines = [], lines_x = [];
 
 	k = lineset.length - k;
-	if (k > 0 || k >= lineset.length || lineset.length == 0)
+	if (k < 0 || k >= lineset.length || lineset.length == 0)
 		return undefined;
 
 	// helper to select the k-eime line in a set, for a coord x
