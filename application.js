@@ -6,6 +6,7 @@
 // point on (x; y) with color
 var point = function(nx, ny, ncolor) {
 	var x = nx, y = ny, color = ncolor;
+	var ux = nx, uy = ny;
 
 	return {
 		color: function() { return color; },
@@ -23,7 +24,7 @@ var point = function(nx, ny, ncolor) {
 		},
 
 		dual: function() {
-			return line(x, y, color);
+			return line(ux, uy, color);
 		},
 
 		draw: function(p) {
@@ -788,11 +789,11 @@ var hamapp = Backbone.View.extend({
 			if (self.lines.length == 0) {
 				$(this.points).each(function(i, p) {
 					if (p.color() == "FF0000FF") {
-						var l = point(p.x, p.y, "FF0000FF").dual();
+						var l = point(p.x(), p.y(), "FF0000FF").dual();
 						self.lines.push(l);
 						rlines.push(l);
 					} else {
-						var l = point(p.x, p.y, "0000FFFF").dual()
+						var l = point(p.x(), p.y(), "0000FFFF").dual()
 						self.lines.push(l);
 						blines.push(l);
 					}
@@ -814,10 +815,11 @@ var hamapp = Backbone.View.extend({
 				"k1": Math.floor((rlines.length + 1)/2),
 				"k2": Math.floor((blines.length + 1)/2),
 			});
+			this.render();
 		},
 	},
 
-	step_cut2: function() {
+	step_cut2: function(params) {
 		// helpers
 		var print_lineset = function(s) {
 			console.log("print lineset");
@@ -834,15 +836,9 @@ var hamapp = Backbone.View.extend({
 			return l1.a() - l2.a();
 		};
 
-		var G1 = [], G2 = [];
-		$(this.lines).each(function(i, l) {
-			if (l.color() == "FF0000FF")
-				G1.push(_.clone(l));
-			else
-				G2.push(_.clone(l));
-		});
+		var self = this;
+		var G1 = params.G1, G2 = params.G2;
 		var m1 = G1.length, m2 = G2.length;
-
 		var G = union(G1, G2);
 		G.sort(steepness);
 
@@ -851,8 +847,6 @@ var hamapp = Backbone.View.extend({
 		print_lineset(G);
 
 		var gstar = G[Math.floor(G.length / 2)];
-		console.log("gstar = " + gstar.str());
-
 		var gminus = [], gplus = [], M = [];
 		for (var i = 0; i < Math.floor(G.length / 2); ++i) {
 			gminus.push(G[i]);
@@ -882,9 +876,12 @@ var hamapp = Backbone.View.extend({
 		var path1 = klevel(G1, k1, "CB00B0FF");
 		var path2 = klevel(G2, k2, "CB00B0FF");
 		var k_points = path1.intersection(path2);
+		self.algo_result.push(path1);
+		self.algo_result.push(path2);
 
 		// if v* is on a intersection:
 		$(k_points).each(function(i, p) {
+			self.algo_result.push(p);
 			if (Math.abs(p.x() - vstar.x()) < 0.0001) {
 				console.log("got a intersection");
 				return;
