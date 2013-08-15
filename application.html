@@ -71,8 +71,7 @@
             <a id="show-canvas" class="tiny button" href="#" style="float: right">show canvas</a>
             {{/if }}
 
-            <h3>{{ help_title }}</h3>
-            {{ help_text }}
+            {{{ help_text }}}
           </div>
         </div>
       </div>
@@ -92,6 +91,75 @@
         </div>
       </div>
       {{/if}}
+    </script>
+
+    <script type="text/help_text" id="help-introduction">
+      <h3>Introduction</h3>
+
+      <p>This web application is the result of the computational geometry project.
+      It provide the user with a editor and some algorithms implementation.</p>
+
+      <p>To show the rendering zone, click on the <i>show canvas</i> button.</p>
+
+      <h5>Sources</h5>
+      <p>The source code of this application is in three parts :
+      <ol>
+        <li>The <i>application.html</i> file contains all the HTML element for
+            this page to work : the main template, the help texts and a no-js
+            error template</li>
+        <li>The <i>application.js</i> file contains all the javascript used
+            for this particular implementation : the datatype developed (point,
+            line, polygon...), the rendering engine and the main application.</li>
+        <li>The <i>thirdparty</i> folder contains all the external library used
+               in this application : <a href="http://jquery.com">jQuery</a>,
+               <a href="http://underscorejs.org">underscore</a>,
+               <a href="http://backbonejs.org">backbone</a>,
+               <a href="http://handlebarsjs.com">handlebars</a>,
+               <a href="http://processingjs.com">processing</a> and
+               <a href="http://foundation.zurbi.com">foundation</a>.</li>
+      </ol>
+      <p>This application use a kind of MVC model as an architectural design.
+         Backbone.js provide the core MVC functionalities (view and controler),
+         handlebars.js provide a templating mechanism to render the HTML page,
+         processing.js provide the rendering system to draw the canvas,
+         foundation is used for the styling of HTML elements and jQuery and underscore.js
+         are used as helpers library for DOM manipulations.
+      </p>
+      <p>The basic idea is very simple. A parametric template is defined in <i>application.html</i>,
+         each time the page is refreshed (for example, when the user click on <i>show canvas</i>),
+         the templating engine is called and render a new page.
+      </p>
+    </script>
+
+    <script type="text/help_text" id="help-editor">
+      <h3>Editor</h3>
+      <p>The editor allow the user to draw graphical primitives to the canvas.</p>
+      <p>Three main primitives : </p>
+      <ol>
+        <li>Point : The user can select the <i>point</i> tool and click anywhere on the
+            canvas, to add a point of the selected color</li>
+        <li>Line : The user can select the <i>line</i> tool and click at the place on
+            the canvas to define two points, which will be used to add a line containing
+            these two points, of the selected color</li>
+        <li>Polygon : The user can select the <i>polygon</i> tool and click several times
+            on the canvas to add a sequence of points, which will be used to add a polygon
+            defined by these points, of the selected color, when the user click on
+            <i>open polygon</i> or <i>close polygon</i>. The polygon will be open or closed,
+            depending of the closure tool used.</li>
+      </ol>
+      <p>The user can at anytime <i>clear</i> the canvas, deleting all the graphical elements
+         inside</p>
+    </script>
+
+    <script type="text/help_algo" id="help-algo">
+      <h3>Algorithms</h3>
+      <p>I tried to implement several algorithms of computationnal geometry :</p>
+      <ol>
+        <li>Line intersections</li>
+        <li>Point inside a polygon</li>
+        <li>K-level of lines set</li>
+        <li>Ham cut of points set</li>
+      </ol>
     </script>
   </head>
 

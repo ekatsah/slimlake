@@ -571,37 +571,44 @@ var hamapp = Backbone.View.extend({
 		},
 
 		"click #a-intro": function() {
+			this.variables.help_text = $("#help-introduction").html();
 			this.variables.mode = "intro";
 			this.tmp = undefined;
 		},
 
 		"click #a-editor": function() {
+			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
 		},
 
 		"click #a-red": function() {
+			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
 			this.variables.color = "FF0000FF";
 		},
 
 		"click #a-blue": function() {
+			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
 			this.variables.color = "0000FFFF";
 		},
 
 		"click #a-point": function() {
+			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
 			this.variables.tool = "point";
 			this.tmp = undefined;
 		},
 
 		"click #a-line": function() {
+			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
 			this.variables.tool = "line";
 			this.tmp = undefined;
 		},
 
 		"click #a-poly": function() {
+			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
 			this.variables.tool = "poly";
 			this.tmp = undefined;
@@ -635,6 +642,7 @@ var hamapp = Backbone.View.extend({
 		},
 
 		"click #a-algo": function() {
+			this.variables.help_text = $("#help-algo").html();
 			this.variables.mode = "algo";
 			this.tmp = undefined;
 		},
