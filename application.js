@@ -463,10 +463,10 @@ var hamapp = Backbone.View.extend({
 			"mode": "intro",
 			"color": "FF0000FF",
 			"algo": "cut2",
-			"display_canvas": true,
+			"display_canvas": false,
 			"help_title": "Introduction",
-			"help_text": "wazup lorem ipsum",
-			"print_debug": true,
+			"help_text": $("#help-introduction").html(),
+			"print_debug": false,
 			"tool": "point",
 			"menu_polygon": false,
 		};
