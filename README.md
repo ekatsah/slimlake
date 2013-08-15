@@ -1,4 +1,4 @@
 Slimlake project
 ================
 
-Work on computationnal geometry project about ham sandwich.
+Work on computational geometry project about ham sandwich.
