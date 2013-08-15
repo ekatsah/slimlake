@@ -775,22 +775,46 @@ var hamapp = Backbone.View.extend({
 			this.tmp = undefined;
 			this.algo_result = undefined;
 			this.current_help = "help-cut2";
+			this.lines = [];
+			this.polys = [];
 			this.render();
 		},
 
 		"click #a-cut2-round": function() {
-			this.lines = [];
-			this.polys = [];
-			self = this;
+			var self = this, rlines = [], blines = [];
 
-			$(this.points).each(function(i, p) {
-				if (p.color() == "FF0000FF")
-					this.lines.push(point(p.x, p.y, "FF0000FF").dual());
-				else
-					this.lines.push(point(p.x, p.y, "0000FFFF").dual());
+			// is it the first round or not?
+			// if so, make all the dual in the line set
+			if (self.lines.length == 0) {
+				$(this.points).each(function(i, p) {
+					if (p.color() == "FF0000FF") {
+						var l = point(p.x, p.y, "FF0000FF").dual();
+						self.lines.push(l);
+						rlines.push(l);
+					} else {
+						var l = point(p.x, p.y, "0000FFFF").dual()
+						self.lines.push(l);
+						blines.push(l);
+					}
+				});
+			// if not, sort by color the lines in two sets
+			} else {
+				$(this.lines).each(function(i, l) {
+					if (l.color() == "FF0000FF")
+						rlines.push(l);
+					else
+						blines.push(l);
+				});
+			}
+
+			self.algo_result = [];
+			var step = this.step_cut2({
+				"G1": rlines,
+				"G2": blines,
+				"k1": Math.floor((rlines.length + 1)/2),
+				"k2": Math.floor((blines.length + 1)/2),
 			});
-
-		}
+		},
 	},
 
 	step_cut2: function() {
@@ -909,16 +933,72 @@ var hamapp = Backbone.View.extend({
 		var wstar = line(gstar.a(), wbase.y() - gstar.a() * wbase.x(), "00FF00FF");
 		self.algo_result.push(wstar);
 
-		sself.points = vothers;
-			$(vothers).each(function(i, p) {
-				console.log(p.str());
-			});
+		var p_up = 0, p_down = 0;
+		$(k_points).each(function(i, p) {
+			var i_y = p.y() - p.x() * wstar.a() + wstar.b();
 
-		//	self.points = k_points;
+			if (Math.abs(i_y) < 0.0001) {
+				console.log("got intersection with wstar");
+				return;
+			}
 
-		//	self.polys.push(path1);
-		//	self.polys.push(path2);
-		},
+			if ((p_left % 2 == 1 && p.x() > vstar.x()) ||
+				(p_right % 2 == 1 && p.x() < vstar.x()))
+				return; // outside of v
 
+			if (i_y > 0)
+				p_up += 1;
+			else
+				p_down += 1;
+		});
+
+		if (p_up % 2 == 1 && p_down % 2 == 0)
+			console.log("w is upper");
+		else if (p_up % 2 == 0 && p_down % 2 == 1)
+			console.log("w is down");
+		else {
+			console.log("bug in algo for w");
+		}
+
+		var pivot = wstar.intersection(vstar);
+
+		var G1prim = [], G2prim = [];
+		$(G1).each(function(i, g) {
+			var gv = vstar.intersection(g);
+			if ((gv.y() > pivot.y() && p_up % 2 == 1) ||
+				(gv.y() < pivot.y() && p_down % 2 == 1)) {
+				G1prim.push(g);
+				return;
+			}
+			var gw = wstar.intersection(g);
+			if (gw && ((gw.x() < pivot.x() && p_left % 2 == 1) ||
+				(gw.x() > pivot.x() && p_right % 2 == 1)))
+				G1prim.push(g);
+		});
+		$(G2).each(function(i, g) {
+			var gv = vstar.intersection(g);
+			if ((gv.y() > pivot.y() && p_up % 2 == 1) ||
+				(gv.y() < pivot.y() && p_down % 2 == 1)) {
+				G2prim.push(g);
+				return;
+			}
+			var gw = wstar.intersection(g);
+			if (gw && ((gw.x() < pivot.x() && p_left % 2 == 1) ||
+				(gw.x() > pivot.x() && p_right % 2 == 1)))
+				G2prim.push(g);
+		});
+
+		var Gprim = union(G1prim, G2prim);
+		return {
+			"G": Gprim,
+			"G1": G1prim,
+			"G2": G2prim,
+			"vstar": vstar,
+			"wstar": wstar,
+			"klevel1": path1,
+			"klevel2": path2,
+			"p_up": p_up,
+			"p_down": p_down,
+		};
 	},
 });
