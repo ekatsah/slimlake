@@ -726,169 +726,6 @@ var hamapp = Backbone.View.extend({
 			this.render();
 		},
 
-		"click #a-cut2": function() {
-			this.variables.mode = "algo";
-			this.variables.algo = "cut2";
-			this.tmp = undefined;
-			this.algo_result = undefined;
-			this.current_help = "help-cut2";
-			this.render();
-		},
-
-		"click #a-cut2-round": function() {
-			// general data
-			this.points = [];
-			this.lines = [];
-			this.polys = [];
-			self = this;
-
-			reds = [{x:1, y:2}, {x:-1, y:-2.9}, {x: 0.5, y: -5}];
-			blues = [{x:-1.2, y:2.5}, {x: 2.5, y: -1}, {x: 4.2, y: 4}, {x: -5, y: -8.4}, {x:-0.4, y: 8}];
-
-			$(reds).each(function(i, p) {
-				self.points.push(point(p.x, p.y, "FF0000FF"));
-				self.lines.push(point(p.x, p.y, "FF0000FF").dual());
-			});
-
-			$(blues).each(function(i, p) {
-				self.points.push(point(p.x, p.y, "0000FFFF"));
-				self.lines.push(point(p.x, p.y, "0000FFFF").dual());
-			});
-
-			// helpers
-			var print_lineset = function(s) {
-				console.log("print lineset");
-				$(s).each(function(i, l) {
-					console.log(" [" + i + "] : " + l.str() + ", color = " + l.color());
-				});
-			};
-
-			var union = function(set1, set2) {
-				return _.clone(set1.concat(set2));
-			};
-
-			var steepness = function(l1, l2) {
-				return l1.a() - l2.a();
-			};
-
-
-			// first round of algo - input
-
-			var G1 = [], G2 = [];
-			$(this.lines).each(function(i, l) {
-				if (l.color() == "FF0000FF")
-					G1.push(_.clone(l));
-				else
-					G2.push(_.clone(l));
-			});
-			var m1 = G1.length, m2 = G2.length;
-
-			var G = union(G1, G2);
-			G.sort(steepness);
-
-			var k1 = Math.floor((m1 + 1)/2), k2 = Math.floor((m2 + 1)/2);
-			console.log("k1 = " + k1 + " et k2 = " + k2);
-			print_lineset(G);
-
-			var gstar = G[Math.floor(G.length / 2)];
-			console.log("gstar = " + gstar.str());
-
-			var gminus = [], gplus = [], M = [];
-			for (var i = 0; i < Math.floor(G.length / 2); ++i) {
-				gminus.push(G[i]);
-				gplus.push(G[G.length - i - 1]);
-				M.push(G[i].intersection(G[G.length - i - 1], "00FF00FF"));
-			}
-
-			print_lineset(gminus);
-			print_lineset(gplus);
-
-			// print M
-			$(M).each(function(i, p) {
-				self.points.push(p);
-			});
-
-			// we need to find v*
-			M.sort(function(p1, p2) {
-				return p1.x() - p2.x();
-			});
-			// 2 cases : M odd, then v* is the middle line
-			//           M even, then v* is between 2 middle points
-			if (M.length % 2 == 0)
-				var vx = (M[M.length/2].x() + M[M.length/2 - 1].x()) / 2;
-			else
-				var vx = M[Math.floor(M.length/2)].x();
-
-			var vstar = vline(vx, "ee8800FF");
-			self.lines.push(vstar);
-
-			var path1 = klevel(G1, k1, "00FF00FF");
-			var path2 = klevel(G2, k2, "00FF00FF");
-			var k_points = path1.intersection(path2);
-
-			// if v* is on a intersection:
-			$(k_points).each(function(i, p) {
-				if (Math.abs(p.x() - vstar.x()) < 0.0001) {
-					console.log("got a intersection");
-					return;
-				}
-			});
-
-			// compute v, count the number of left and right points
-			var p_left = 0, p_right = 0;
-			$(k_points).each(function(i, p) {
-				if (p.x() < vstar.x())
-					p_left += 1;
-				else
-					p_right += 1;
-			});
-
-			if (p_left % 2 == 1 && p_right % 2 == 0)
-				console.log("left is odd, not right");
-			else if (p_right % 2 == 1 && p_left % 2 == 0)
-				console.log("right is odd, not left");
-			else {
-				console.log("algorithm error, p_left = " + p_left + " && p_right = " + p_right);
-				return;
-			}
-
-			var vothers = [];
-			$(M).each(function(i, p) {
-				if (p_left % 2 == 1 && p.x() > vstar.x())
-					vothers.push(p);
-				if (p_right % 2 == 1 && p.x() < vstar.x())
-					vothers.push(p);
-			});
-
-			vothers.sort(function(p1, p2) {
-				return p1.x() - p2.x();
-			});
-
-			if (vothers.length % 2 == 0)
-				var wbase = point(
-					(vothers[vothers.length/2].x() + vothers[vothers.length/2-1].x()) / 2,
-					(vothers[vothers.length/2].y() + vothers[vothers.length/2-1].y()) / 2,
-					"000000FF"
-				);
-			else
-				var wbase = vothers[Math.floor(vothers.length/2)];
-
-			wstar = line(gstar.a(), wbase.y() - gstar.a() * wbase.x(), "AAAA00FF");
-			self.lines.push(wstar);
-
-
-
-			self.points = vothers;
-			$(vothers).each(function(i, p) {
-				console.log(p.str());
-			});
-
-		//	self.points = k_points;
-
-		//	self.polys.push(path1);
-		//	self.polys.push(path2);
-		},
-
 		"click #a-klevel": function() {
 			this.variables.mode = "algo";
 			this.variables.algo = "klevel";
@@ -929,5 +766,157 @@ var hamapp = Backbone.View.extend({
 			});
 			this.render();
 		},
+
+		"click #a-cut2": function() {
+			this.variables.mode = "algo";
+			this.variables.algo = "cut2";
+			this.tmp = undefined;
+			this.algo_result = undefined;
+			this.current_help = "help-cut2";
+			this.render();
+		},
+
+		"click #a-cut2-round": function() {
+			this.lines = [];
+			this.polys = [];
+			self = this;
+
+			$(this.points).each(function(i, p) {
+				if (p.color() == "FF0000FF")
+					this.lines.push(point(p.x, p.y, "FF0000FF").dual());
+				else
+					this.lines.push(point(p.x, p.y, "0000FFFF").dual());
+			});
+
+		}
+	},
+
+	step_cut2: function() {
+		// helpers
+		var print_lineset = function(s) {
+			console.log("print lineset");
+			$(s).each(function(i, l) {
+				console.log(" [" + i + "] : " + l.str() + ", color = " + l.color());
+			});
+		};
+
+		var union = function(set1, set2) {
+			return _.clone(set1.concat(set2));
+		};
+
+		var steepness = function(l1, l2) {
+			return l1.a() - l2.a();
+		};
+
+		var G1 = [], G2 = [];
+		$(this.lines).each(function(i, l) {
+			if (l.color() == "FF0000FF")
+				G1.push(_.clone(l));
+			else
+				G2.push(_.clone(l));
+		});
+		var m1 = G1.length, m2 = G2.length;
+
+		var G = union(G1, G2);
+		G.sort(steepness);
+
+		var k1 = Math.floor((m1 + 1)/2), k2 = Math.floor((m2 + 1)/2);
+		console.log("k1 = " + k1 + " et k2 = " + k2);
+		print_lineset(G);
+
+		var gstar = G[Math.floor(G.length / 2)];
+		console.log("gstar = " + gstar.str());
+
+		var gminus = [], gplus = [], M = [];
+		for (var i = 0; i < Math.floor(G.length / 2); ++i) {
+			gminus.push(G[i]);
+			gplus.push(G[G.length - i - 1]);
+			M.push(G[i].intersection(G[G.length - i - 1], "000000FF"));
+		}
+
+		// print M
+		$(M).each(function(i, p) {
+			self.algo_result.push(p);
+		});
+
+		// we need to find v*
+		M.sort(function(p1, p2) {
+			return p1.x() - p2.x();
+		});
+		// 2 cases : M odd, then v* is the middle line
+		//           M even, then v* is between 2 middle points
+		if (M.length % 2 == 0)
+			var vx = (M[M.length/2].x() + M[M.length/2 - 1].x()) / 2;
+		else
+			var vx = M[Math.floor(M.length/2)].x();
+
+		var vstar = vline(vx, "00FF00FF");
+		self.algo_result.push(vstar);
+
+		var path1 = klevel(G1, k1, "CB00B0FF");
+		var path2 = klevel(G2, k2, "CB00B0FF");
+		var k_points = path1.intersection(path2);
+
+		// if v* is on a intersection:
+		$(k_points).each(function(i, p) {
+			if (Math.abs(p.x() - vstar.x()) < 0.0001) {
+				console.log("got a intersection");
+				return;
+			}
+		});
+
+		// compute v, count the number of left and right points
+		var p_left = 0, p_right = 0;
+		$(k_points).each(function(i, p) {
+			if (p.x() < vstar.x())
+				p_left += 1;
+			else
+				p_right += 1;
+		});
+
+		if (p_left % 2 == 1 && p_right % 2 == 0)
+			console.log("left is odd, not right, v is on the right side of v*");
+		else if (p_right % 2 == 1 && p_left % 2 == 0)
+			console.log("right is odd, not left, v is on the left side of v*");
+		else {
+			console.log("algorithm error, p_left = " + p_left + " && p_right = " + p_right);
+			return;
+		}
+
+		var vothers = [];
+		$(M).each(function(i, p) {
+			if (p_left % 2 == 1 && p.x() > vstar.x())
+				vothers.push(p);
+			if (p_right % 2 == 1 && p.x() < vstar.x())
+				vothers.push(p);
+		});
+
+		vothers.sort(function(p1, p2) {
+			return p1.x() - p2.x();
+		});
+
+		if (vothers.length % 2 == 0)
+			var wbase = point(
+				(vothers[vothers.length/2].x() + vothers[vothers.length/2-1].x()) / 2,
+				(vothers[vothers.length/2].y() + vothers[vothers.length/2-1].y()) / 2,
+				"000000FF"
+			);
+		else
+			var wbase = vothers[Math.floor(vothers.length/2)];
+
+		var wstar = line(gstar.a(), wbase.y() - gstar.a() * wbase.x(), "00FF00FF");
+		self.algo_result.push(wstar);
+
+		sself.points = vothers;
+			$(vothers).each(function(i, p) {
+				console.log(p.str());
+			});
+
+		//	self.points = k_points;
+
+		//	self.polys.push(path1);
+		//	self.polys.push(path2);
+		},
+
 	},
 });
