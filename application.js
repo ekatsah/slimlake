@@ -790,11 +790,9 @@ var hamapp = Backbone.View.extend({
 				$(this.points).each(function(i, p) {
 					if (p.color() == "FF0000FF") {
 						var l = point(p.x(), p.y(), "FF0000FF").dual();
-						self.lines.push(l);
 						rlines.push(l);
 					} else {
 						var l = point(p.x(), p.y(), "0000FFFF").dual()
-						self.lines.push(l);
 						blines.push(l);
 					}
 				});
@@ -814,6 +812,14 @@ var hamapp = Backbone.View.extend({
 				"G2": blines,
 				"k1": Math.floor((rlines.length + 1)/2),
 				"k2": Math.floor((blines.length + 1)/2),
+			});
+
+			this.lines = [];
+			$(step.G1).each(function(i, l) {
+				self.lines.push(l);
+			});
+			$(step.G2).each(function(i, l) {
+				self.lines.push(l);
 			});
 			this.render();
 		},
