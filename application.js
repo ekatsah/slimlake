@@ -444,6 +444,8 @@ new_canvas = function() {
 
 var hamapp = Backbone.View.extend({
 	initialize: function() {
+		var self = this;
+
 		Handlebars.registerHelper("active2", function(variable, value, item) {
 			if (variable == value)
 				return 'class="active"';
@@ -459,13 +461,23 @@ var hamapp = Backbone.View.extend({
 		});
 
 		this.template = Handlebars.compile($("#main-page").html());
+		this.helps = {};
+		$("script[data-ref=help]").each(function(i, t) {
+			var id = $(t).attr("id");
+			self.helps[id] = Handlebars.compile($(t).html());
+		});
+		this.help_params = {
+			rkvalue: 1,
+			bkvalue: 1,
+			raw_text: undefined,
+		};
+		this.current_help = "help-introduction";
+
 		this.variables = {
 			"mode": "intro",
 			"color": "FF0000FF",
 			"algo": "cut2",
 			"display_canvas": false,
-			"help_title": "Introduction",
-			"help_text": $("#help-introduction").html(),
 			"print_debug": false,
 			"tool": "point",
 			"menu_polygon": false,
@@ -490,6 +502,7 @@ var hamapp = Backbone.View.extend({
 
 		var html = this.template(this.variables);
 		$(this.el).html(html);
+		$("#help-container").html(this.helps[this.current_help](this.help_params));
 
 		if (this.variables.display_canvas) {
 			ce = this.canvas_engine;
@@ -532,23 +545,14 @@ var hamapp = Backbone.View.extend({
 	},
 
 	events: {
-		"click": function() {
-			this.render();
-
-			if (this.variables.mode == "algo" && this.variables.algo == "inside") {
-				if (this.polys[0].is_inside(this.points[0]))
-					$("#inside-text").html("The point " + this.points[0].str() + " is inside");
-				else
-					$("#inside-text").html("The point " + this.points[0].str() + " is outside");
-			}
-		},
-
 		"click #mask-canvas": function() {
 			this.variables.display_canvas = false;
+			this.render();
 		},
 
 		"click #show-canvas": function() {
 			this.variables.display_canvas = true;
+			this.render();
 		},
 
 		"click #render-zone": function(e) {
@@ -580,58 +584,66 @@ var hamapp = Backbone.View.extend({
 						this.tmp = [];
 					this.tmp.push({x: pos.x, y: pos.y});
 				}
+				this.render();
 			}
 		},
 
 		"click #a-intro": function() {
-			this.variables.help_text = $("#help-introduction").html();
+			this.current_help = "help-introduction";
 			this.variables.mode = "intro";
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-editor": function() {
-			this.variables.help_text = $("#help-editor").html();
+			this.current_help = "help-editor";
 			this.variables.mode = "editor";
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-red": function() {
-			this.variables.help_text = $("#help-editor").html();
+			this.current_help = "help-editor";
 			this.variables.mode = "editor";
 			this.variables.color = "FF0000FF";
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-blue": function() {
-			this.variables.help_text = $("#help-editor").html();
+			this.current_help = "help-editor";
 			this.variables.mode = "editor";
 			this.variables.color = "0000FFFF";
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-point": function() {
-			this.variables.help_text = $("#help-editor").html();
+			this.current_help = "help-editor";
 			this.variables.mode = "editor";
 			this.variables.tool = "point";
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-line": function() {
-			this.variables.help_text = $("#help-editor").html();
+			this.current_help = "help-editor";
 			this.variables.mode = "editor";
 			this.variables.tool = "line";
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-poly": function() {
-			this.variables.help_text = $("#help-editor").html();
+			this.current_help = "help-editor";
 			this.variables.mode = "editor";
 			this.variables.tool = "poly";
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-open": function() {
@@ -643,6 +655,7 @@ var hamapp = Backbone.View.extend({
 			this.polys.push(polygon(pts, color, false));
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-close": function() {
@@ -654,6 +667,7 @@ var hamapp = Backbone.View.extend({
 			this.polys.push(polygon(pts, color, true));
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-clear": function() {
@@ -662,21 +676,23 @@ var hamapp = Backbone.View.extend({
 			this.polys = [];
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-algo": function() {
-			this.variables.help_text = $("#help-algo").html();
+			this.current_help = "help-algo";
 			this.variables.mode = "algo";
+			this.variables.algo = "";
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.render();
 		},
 
 		"click #a-inters": function() {
 			this.variables.mode = "algo";
 			this.variables.algo = "inter";
 			this.tmp = undefined;
-			this.variables.help_text = $("#help-intersection").html();
-			console.log("intersection");
+			this.current_help = "help-intersection";
 
 			var inter = [], self = this;
 			$(self.lines).each(function(i1, l1) {
@@ -687,6 +703,7 @@ var hamapp = Backbone.View.extend({
 			});
 
 			this.algo_result = inter;
+			this.render();
 		},
 				
 		"click #a-inside": function() {
@@ -698,18 +715,27 @@ var hamapp = Backbone.View.extend({
 			// check if point is inside a polygon
 			if (this.points.length != 1 ||
 					this.polys.length != 1) {
-				this.variables.help_text = $("#help-inside-error").html();
-				return;
+				this.current_help = "help-inside-error";
+			} else {
+				this.current_help = "help-inside-ok";
+				if (this.polys[0].is_inside(this.points[0]))
+					this.help_params.raw_text = "The point " + this.points[0].str() + " is inside";
+				else
+					this.help_params.raw_text = "The point " + this.points[0].str() + " is outside";
 			}
-
-			this.variables.help_text = $("#help-inside-ok").html();
+			this.render();
 		},
 
 		"click #a-cut2": function() {
 			this.variables.mode = "algo";
 			this.variables.algo = "cut2";
 			this.tmp = undefined;
+			this.algo_result = undefined;
+			this.current_help = "help-cut2";
+			this.render();
+		},
 
+		"click #a-cut2-round": function() {
 			// general data
 			this.points = [];
 			this.lines = [];
@@ -868,36 +894,40 @@ var hamapp = Backbone.View.extend({
 			this.variables.algo = "klevel";
 			this.tmp = undefined;
 			this.algo_result = undefined;
+			this.current_help = "help-klevel";
+			this.render();
+		},
 
-			// general data
-			this.points = [];
-			this.lines = [];
-			this.polys = [];
-			self = this;
-
-			var reds = [{x:-0.2, y:1}, {x:-1, y:-5}, {x: 0.7, y: -5}];
-			var blues = [{x:-1.5, y:2.5}, {x: -0.7, y: -1}, {x: 0.1, y: 4}, {x: 0.5, y: -1.4}, {x:0.9, y: 2}];
-			var redline = [], blueline = [];
-
-			$(reds).each(function(i, p) {
-		//		self.points.push(point(p.x, p.y, "FF0000FF"));
-				self.lines.push(point(p.x, p.y, "FF0000FF").dual());
-				redline.push(point(p.x, p.y, "FF0000FF").dual());
+		"click #klevel-go": function() {
+			var redline = [], blueline = [], self = this;
+			$(this.lines).each(function(i, l) {
+				if (l.color() == "FF0000FF")
+					redline.push(l);
+				else
+					blueline.push(l);
 			});
 
-			$(blues).each(function(i, p) {
-		//		self.points.push(point(p.x, p.y, "0000FFFF"));
-				self.lines.push(point(p.x, p.y, "0000FFFF").dual());
-				blueline.push(point(p.x, p.y, "0000FFFF").dual());
+			var k1 = $("#red-k").val();
+			var k2 = $("#blue-k").val();
+			this.help_params.rkvalue = k1;
+			this.help_params.bkvalue = k2;
+
+			if (k1 <= 0 || k1 > redline.length || k2 <= 0 || k2 > blueline.length) {
+				this.current_help = "help-klevel-error";
+				return;
+			}
+
+			var path1 = klevel(redline, k1, "CB7C00FF");
+			var path2 = klevel(blueline, k2, "CB00B1FF");
+			this.algo_result = [];
+			this.algo_result.push(path1);
+			this.algo_result.push(path2);
+
+			var pts = path1.intersection(path2, "00FF00FF");
+			$(pts).each(function(i, p) {
+				self.algo_result.push(p);
 			});
-
-			var path1 = klevel(redline, 1, "00FF00FF");
-			var path2 = klevel(blueline, 3, "888800FF");
-			self.polys.push(path1);
-			self.polys.push(path2);
-
-			pts = path1.intersection(path2, "FF0000FF");
-			self.points = pts;
+			this.render();
 		},
 	},
 });

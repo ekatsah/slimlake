@@ -72,7 +72,7 @@
             <a id="show-canvas" class="tiny button" href="#" style="float: right">show canvas</a>
             {{/if }}
 
-            {{{ help_text }}}
+            <div id="help-container"></div>
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@
       {{/if}}
     </script>
 
-    <script type="text/help_text" id="help-introduction">
+    <script type="text/help_text" id="help-introduction" data-ref="help">
       <h3>Introduction</h3>
 
       <p>This web application is the result of the computational geometry project.
@@ -132,7 +132,7 @@
       </p>
     </script>
 
-    <script type="text/help_text" id="help-editor">
+    <script type="text/help_text" id="help-editor" data-ref="help">
       <h3>Editor</h3>
       <p>The editor allow the user to draw graphical primitives to the canvas.</p>
       <p>Three main primitives : </p>
@@ -152,7 +152,7 @@
          inside</p>
     </script>
 
-    <script type="text/help_text" id="help-algo">
+    <script type="text/help_text" id="help-algo" data-ref="help">
       <h3>Algorithms</h3>
       <p>I tried to implement several algorithms of computationnal geometry :</p>
       <ol>
@@ -163,19 +163,53 @@
       </ol>
     </script>
 
-    <script type="text/help_text" id="help-intersection">
+    <script type="text/help_text" id="help-intersection" data-ref="help">
       <h3>Intersections</h3>
       <p>This algorithm compute the intersections of all the lines in the canvas</p>
     </script>
 
-    <script type="text/help_text" id="help-inside-ok">
+    <script type="text/help_text" id="help-inside-ok" data-ref="help">
       <h3>Point inside a polygon</h3>
-      <p id="inside-text"></p>
+      <p>{{{ raw_text }}}</p>
     </script>
-    <script type="text/help_text" id="help-inside-error">
+    <script type="text/help_text" id="help-inside-error" data-ref="help">
       <h3>Error!</h3>
       <p>This algorithm need a certain input : a point and a polygon. There must be only one point
          and one polygon. The colors don't matter</p>
+    </script>
+
+    <script type="text/help_text" id="help-klevel" data-ref="help">
+      <h3>K-level</h3>
+      <p>A k-level of a set of line is a set of points that are above and below a certain number of
+         lines from the line set. The input for this algorithm is two set of lines (one blue and one red)
+         and two numbers for the level. The result are a brown set of segments for the k-level of red lines
+         and a violet set of segments for the k-level of blue lines.</p>
+
+      <p>Level for the red set : <input id="red-k" value="{{ rkvalue }}" style="width: 50px;"/><br>
+         Level for the blue set : <input id="blue-k" value="{{ bkvalue }}" style="width: 50px;"/><br>
+         <input type="button" id="klevel-go" value="compute!"/></p>
+
+      <p>When possible, the algorithm will also compute the intersection of the brown and violet points, in green</p>
+    </script>
+    <script type="text/help_text" id="help-klevel-error" data-ref="help">
+      <h3>Error!</h3>
+      <p>Input error : the k-levels are wrong with these sets of lines</p>
+    </script>
+
+    <script type="text/help_text" id="help-cut2" data-ref="help">
+      <h3>Ham Sandwich Cut</h3>
+      <p>The ham sandwich cut is a line dividing two sets of points : the red points and
+         the blue points.</p>
+      <p>Mainly, the algorithm use the dual of each point (a line, where primal is (p_x, p_y),
+         the dual is y = p_x * x - p_y), and prune a number of element from the dual set at each round,
+         resulting in a line whom bisect the two sets of points</p>
+      <p>At each <a href="#" id="a-cut2-round">round</a> (click to itere), the algorithm compute :</p>
+      <ol>
+        <li>The dual (lines) for all the points</li>
+        <li>The set of intersections (M) of the pairing of the least steep lines 
+            with the with the most steep one, in black</li>
+        <li>A vertical line, v*, in green, whom bisect M in two</li>
+      </ol>
     </script>
   </head>
 
