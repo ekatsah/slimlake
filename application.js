@@ -8,6 +8,8 @@ var point = function(nx, ny, ncolor) {
 	var x = nx, y = ny, color = ncolor;
 
 	return {
+		color: function() { return color; },
+
 		x: function(a) {
 			if (a != undefined)
 				x = a;
