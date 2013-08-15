@@ -49,9 +49,10 @@
             <li {{{active2 mode "algo"}}}><a href="#" id="a-algo">Algorithms</a></li>
             <li>
               <ul class="side-nav" style="margin-left: 10px; padding-top: 0px">
+                <li {{{active4 mode "algo" algo "inter"}}}><a href="#" id="a-inters">Intersection</a></li>
                 <li {{{active4 mode "algo" algo "inside"}}}><a href="#" id="a-inside">Point inside polygon</a></li>
-                <li {{{active4 mode "algo" algo "cut2"}}}><a href="#" id="a-cut2">Cut in two damit</a></li>
                 <li {{{active4 mode "algo" algo "klevel"}}}><a href="#" id="a-klevel">k-level algo</a></li>
+                <li {{{active4 mode "algo" algo "cut2"}}}><a href="#" id="a-cut2">Cut in two damit</a></li>
               </ul>
             </li>
           </ul>
@@ -151,7 +152,7 @@
          inside</p>
     </script>
 
-    <script type="text/help_algo" id="help-algo">
+    <script type="text/help_text" id="help-algo">
       <h3>Algorithms</h3>
       <p>I tried to implement several algorithms of computationnal geometry :</p>
       <ol>
@@ -161,6 +162,21 @@
         <li>Ham cut of points set</li>
       </ol>
     </script>
+
+    <script type="text/help_text" id="help-intersection">
+      <h3>Intersections</h3>
+      <p>This algorithm compute the intersections of all the lines in the canvas</p>
+    </script>
+
+    <script type="text/help_text" id="help-inside-ok">
+      <h3>Point inside a polygon</h3>
+      <p id="inside-text"></p>
+    </script>
+    <script type="text/help_text" id="help-inside-error">
+      <h3>Error!</h3>
+      <p>This algorithm need a certain input : a point and a polygon. There must be only one point
+         and one polygon. The colors don't matter</p>
+    </script>
   </head>
 
   <body>
@@ -168,7 +184,7 @@
       <h1>A wild error appears!</h1>
       <p>This web application requires javascript and a decent browser.<br>
          Please change your browser or activate javascript</p>
-      <img src="sharky/fry-js-active.jpg">
+      <img src="fry-js-active.jpg">
     </center>
     <script>
       $(document).foundation();

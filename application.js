@@ -475,6 +475,7 @@ var hamapp = Backbone.View.extend({
 		this.lines = [];
 		this.polys = [];
 		this.tmp = undefined;
+		this.algo_result = undefined;
 
 		this.canvas_engine = new_canvas();
 		this.canvas_engine.set_size(710, 600);
@@ -510,6 +511,10 @@ var hamapp = Backbone.View.extend({
 				ce.add(point(o.x, o.y, "00FF00FF"));
 			});
 
+			$(this.algo_result).each(function(i, o) {
+				ce.add(o);
+			});
+
 			ce.draw();
 		}
 	},
@@ -529,6 +534,13 @@ var hamapp = Backbone.View.extend({
 	events: {
 		"click": function() {
 			this.render();
+
+			if (this.variables.mode == "algo" && this.variables.algo == "inside") {
+				if (this.polys[0].is_inside(this.points[0]))
+					$("#inside-text").html("The point " + this.points[0].str() + " is inside");
+				else
+					$("#inside-text").html("The point " + this.points[0].str() + " is outside");
+			}
 		},
 
 		"click #mask-canvas": function() {
@@ -543,6 +555,7 @@ var hamapp = Backbone.View.extend({
 			var pos = this.xy(e);
 
 			if (this.variables.mode == "editor") {
+				this.algo_result = undefined;
 				if (this.variables.tool == "point")
 					this.points.push(point(pos.x, pos.y, this.variables.color));
 
@@ -574,23 +587,27 @@ var hamapp = Backbone.View.extend({
 			this.variables.help_text = $("#help-introduction").html();
 			this.variables.mode = "intro";
 			this.tmp = undefined;
+			this.algo_result = undefined;
 		},
 
 		"click #a-editor": function() {
 			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
+			this.algo_result = undefined;
 		},
 
 		"click #a-red": function() {
 			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
 			this.variables.color = "FF0000FF";
+			this.algo_result = undefined;
 		},
 
 		"click #a-blue": function() {
 			this.variables.help_text = $("#help-editor").html();
 			this.variables.mode = "editor";
 			this.variables.color = "0000FFFF";
+			this.algo_result = undefined;
 		},
 
 		"click #a-point": function() {
@@ -598,6 +615,7 @@ var hamapp = Backbone.View.extend({
 			this.variables.mode = "editor";
 			this.variables.tool = "point";
 			this.tmp = undefined;
+			this.algo_result = undefined;
 		},
 
 		"click #a-line": function() {
@@ -605,6 +623,7 @@ var hamapp = Backbone.View.extend({
 			this.variables.mode = "editor";
 			this.variables.tool = "line";
 			this.tmp = undefined;
+			this.algo_result = undefined;
 		},
 
 		"click #a-poly": function() {
@@ -612,6 +631,7 @@ var hamapp = Backbone.View.extend({
 			this.variables.mode = "editor";
 			this.variables.tool = "poly";
 			this.tmp = undefined;
+			this.algo_result = undefined;
 		},
 
 		"click #a-open": function() {
@@ -622,6 +642,7 @@ var hamapp = Backbone.View.extend({
 			});
 			this.polys.push(polygon(pts, color, false));
 			this.tmp = undefined;
+			this.algo_result = undefined;
 		},
 
 		"click #a-close": function() {
@@ -632,6 +653,7 @@ var hamapp = Backbone.View.extend({
 			});
 			this.polys.push(polygon(pts, color, true));
 			this.tmp = undefined;
+			this.algo_result = undefined;
 		},
 
 		"click #a-clear": function() {
@@ -639,30 +661,48 @@ var hamapp = Backbone.View.extend({
 			this.lines = [];
 			this.polys = [];
 			this.tmp = undefined;
+			this.algo_result = undefined;
 		},
 
 		"click #a-algo": function() {
 			this.variables.help_text = $("#help-algo").html();
 			this.variables.mode = "algo";
 			this.tmp = undefined;
+			this.algo_result = undefined;
 		},
 
+		"click #a-inters": function() {
+			this.variables.mode = "algo";
+			this.variables.algo = "inter";
+			this.tmp = undefined;
+			this.variables.help_text = $("#help-intersection").html();
+			console.log("intersection");
+
+			var inter = [], self = this;
+			$(self.lines).each(function(i1, l1) {
+				$(self.lines).each(function(i2, l2) {
+					if (i2 > i1)
+						inter.push(l1.intersection(l2));
+				});
+			});
+
+			this.algo_result = inter;
+		},
+				
 		"click #a-inside": function() {
 			this.variables.mode = "algo";
 			this.variables.algo = "inside";
 			this.tmp = undefined;
+			this.algo_result = undefined;
 
 			// check if point is inside a polygon
 			if (this.points.length != 1 ||
 					this.polys.length != 1) {
-				this.variables.help_text = "error in input variables";
+				this.variables.help_text = $("#help-inside-error").html();
 				return;
 			}
 
-			if (this.polys[0].is_inside(this.points[0]))
-				this.variables.help_text = "the point " + this.points[0].str() + " is inside";
-			else
-				this.variables.help_text = "the point " + this.points[0].str() + " is outside";
+			this.variables.help_text = $("#help-inside-ok").html();
 		},
 
 		"click #a-cut2": function() {
@@ -827,6 +867,7 @@ var hamapp = Backbone.View.extend({
 			this.variables.mode = "algo";
 			this.variables.algo = "klevel";
 			this.tmp = undefined;
+			this.algo_result = undefined;
 
 			// general data
 			this.points = [];
